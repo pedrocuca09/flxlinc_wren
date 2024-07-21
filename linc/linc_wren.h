@@ -15,7 +15,8 @@ namespace linc {
 
         extern WrenVM* newVM(WrenConfiguration &config);
         extern ::String getSlotString(WrenVM* vm, int slot);
-        
+        extern void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
+		extern void unroot(void* ptr);
         
 		
 		inline WrenConfiguration initConfiguration() {

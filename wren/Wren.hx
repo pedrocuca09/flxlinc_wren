@@ -55,7 +55,7 @@ extern class Wren {
 	static function getSlotDouble(vm:WrenVM, slot:Int) : Float;
 
 	@:native('wrenGetSlotForeign')
-	static function getSlotForeign<T>(vm:WrenVM, slot:Int) : cpp.Pointer<T>;
+	static function getSlotForeign<T>(vm:WrenVM, slot:Int) : cpp.RawPointer<T>;
 
 	@:native('linc::wren::getSlotString')
 	static function getSlotString(vm:WrenVM, slot:Int) : String;
@@ -73,7 +73,7 @@ extern class Wren {
 	static function setSlotDouble(vm:WrenVM, slot:Int, value:Float) : Void;
 
 	@:native('wrenSetSlotNewForeign')
-	static function setSlotNewForeign<T>(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.Pointer<T>;
+	static function setSlotNewForeign<T>(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.RawPointer<T>;
 
 	@:native('wrenSetSlotNewList')
 	static function setSlotNewList(vm:WrenVM, slot:Int) : Void;
@@ -101,6 +101,12 @@ extern class Wren {
 
 	@:native('wrenAbortFiber')
 	static function abortFiber(vm:WrenVM, slot:Int) : Void;
+	
+	@:native('linc::wren::setSlotNewForeignDynamic')
+	static function setSlotNewForeignDynamic<T>(vm:WrenVM, slot:Int, classSlot:Int, obj:Dynamic) : Void;
+	
+	@:native('linc::wren::unroot')
+	static function unroot<T>(ptr:cpp.RawPointer<Void>) : Void;
 	
 
 } //Wren

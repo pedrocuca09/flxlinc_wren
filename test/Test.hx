@@ -8,15 +8,15 @@ import wren.WrenForeignClassMethods;
 class Test {
 	function new() {
 		
-		var conf = WrenConfiguration.init();
+		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
 		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
-		var vm:WrenVM = Wren.newVM(conf);
+		final vm:WrenVM = Wren.newVM(conf);
 	
-		var file:String = sys.io.File.getContent("test/script.wren");
-		var result = Wren.interpret(vm, 'main',  file);
+		final file:String = sys.io.File.getContent("test/script.wren");
+		final result = Wren.interpret(vm, 'main',  file);
 		
 		switch result {
 			case WREN_RESULT_SUCCESS: trace('WREN_RESULT_SUCCESS');
@@ -26,13 +26,14 @@ class Test {
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.getVariable(vm, "main", "Call", 0);
-		var callClass:WrenHandle = Wren.getSlotHandle(vm, 0);
+		final callClass:WrenHandle = Wren.getSlotHandle(vm, 0);
 	
-		var noParams:WrenHandle = Wren.makeCallHandle(vm, "noParams");
-		var zero:WrenHandle = Wren.makeCallHandle(vm, "zero()");
-		var one:WrenHandle = Wren.makeCallHandle(vm, "one(_)");
-		var add:WrenHandle = Wren.makeCallHandle(vm, "add(_,_)");
-		var point:WrenHandle = Wren.makeCallHandle(vm, "testPoint()");
+		final noParams:WrenHandle = Wren.makeCallHandle(vm, "noParams");
+		final zero:WrenHandle = Wren.makeCallHandle(vm, "zero()");
+		final one:WrenHandle = Wren.makeCallHandle(vm, "one(_)");
+		final add:WrenHandle = Wren.makeCallHandle(vm, "add(_,_)");
+		final point:WrenHandle = Wren.makeCallHandle(vm, "point()");
+		final stress:WrenHandle = Wren.makeCallHandle(vm, "stress()");
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
@@ -58,18 +59,42 @@ class Test {
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
 		Wren.call(vm, point);
+		
+		for(i in 0...10) {
+			Wren.ensureSlots(vm, 1);
+			Wren.setSlotHandle(vm, 0, callClass);
+			final result = Wren.call(vm, stress);
+			Wren.collectGarbage(vm);
+			debug();
+		}
 	
 		Wren.releaseHandle(vm, callClass);
 		Wren.releaseHandle(vm, noParams);
 		Wren.releaseHandle(vm, zero);
 		Wren.releaseHandle(vm, one);
+		Wren.releaseHandle(vm, add);
+		Wren.releaseHandle(vm, point);
+		Wren.releaseHandle(vm, stress);
 	
+		debug();
+		trace('free vm start');
 		Wren.freeVM(vm);
+		trace('free vm done');
+		debug();
+	}
+	
+	static function debug() {
+		// trace('run gc'); cpp.vm.Gc.run(false);
+		// trace('compact'); cpp.vm.Gc.compact();
+		trace('MEM_INFO_USAGE', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_USAGE));
+		trace('MEM_INFO_RESERVED', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_RESERVED));
+		trace('MEM_INFO_CURRENT', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_CURRENT));
+		trace('MEM_INFO_LARGE', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_LARGE));
 	}
 
 	static function main() {
 		
-		var test = new Test();
+		final test = new Test();
 		// test.writeFn((null:Any), (null:Any));
 		
 	}
@@ -121,34 +146,49 @@ function bindForeignClassFn(
 }
 
 function add(vm:RawWrenVM) {
-	var a = Wren.getSlotDouble(vm, 1);
-	var b = Wren.getSlotDouble(vm, 2);
+	final a = Wren.getSlotDouble(vm, 1);
+	final b = Wren.getSlotDouble(vm, 2);
 	Wren.setSlotDouble(vm, 0, a + b);
 }
 
 function instance(vm:RawWrenVM) {
-	var inst:cpp.Pointer<Point> = cast Wren.getSlotForeign(vm, 0);
-	trace('invoking instance print', inst.value.toString());
+	final ptr:cpp.Pointer<Point> = Wren.getSlotForeign(vm, 0);
+	final point = cpp.Native.get((cast ptr:cpp.Star<Point>));
+	if(point == null || point.toString() == null) {
+		throw 'invalid instance';
+	}
+
 }
+
+var allocated = 0;
+var finalized = 0;
+
+// var point:Point;
 
 function allocatePoint(vm:RawWrenVM) {
-	trace('allocatePoint');
 	var point = new Point();
-	final ptr:cpp.Pointer<Point> = Wren.setSlotNewForeign(vm, 0, 0, untyped __cpp__('sizeof(::Dynamic)'));
-	cpp.Native.set((cast ptr:cpp.Star<Point>), point);
-	// TODO: GCAddRoot
+	Wren.setSlotNewForeignDynamic(vm, 0, 0, point);
+	if(allocated < 10 || allocated % 100 == 0) {
+		trace('allocated', allocated);
+	}
+	allocated++;
+	
 }
 
-function finalizePoint(data:cpp.RawPointer<Void>) {
-	trace('finalizePoint');
-	var inst:cpp.Pointer<Point> = cast data;
-	trace('finalizing', inst.value.toString());
-	// TODO: GCRemoveRoot
+function finalizePoint(ptr:cpp.RawPointer<Void>) {
+	Wren.unroot(ptr);
+	if(finalized % 100 == 0) {
+		trace('finalized', finalized);
+		
+	}
+	finalized++;
 }
 
 class Point {
+	@:keep
+	final data = [for(i in 0...1000000) i];
 	public function new() {
-		trace('new Point');
+		// trace('new Point');
 	}
 	public function toString() {
 		return 'My Point';

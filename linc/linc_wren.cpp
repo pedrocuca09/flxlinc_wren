@@ -97,6 +97,18 @@ namespace linc {
             return ::String(wrenGetSlotString(vm, slot));
 
         }
+		
+		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj) {
+			auto ptr = wrenSetSlotNewForeign(vm, slot, classSlot, sizeof(::hx::Object*));
+			auto root = static_cast<::hx::Object**>(ptr);
+			*root = obj.mPtr;
+			::hx::GCAddRoot(root);
+			// return root;
+		}
+		
+		void unroot(void* ptr) {
+			::hx::GCRemoveRoot(static_cast<::hx::Object**>(ptr));
+		}
 
     } //wren
 
