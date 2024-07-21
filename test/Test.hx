@@ -2,6 +2,8 @@ import wren.Wren;
 import wren.WrenVM;
 import wren.WrenHandle;
 import wren.WrenConfiguration;
+import wren.WrenForeignMethodFn;
+import wren.WrenForeignClassMethods;
 
 class Test {
 	function new() {
@@ -10,6 +12,7 @@ class Test {
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
+		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
 		var vm:WrenVM = Wren.newVM(conf);
 	
 		var file:String = sys.io.File.getContent("test/script.wren");
@@ -29,6 +32,7 @@ class Test {
 		var zero:WrenHandle = Wren.makeCallHandle(vm, "zero()");
 		var one:WrenHandle = Wren.makeCallHandle(vm, "one(_)");
 		var add:WrenHandle = Wren.makeCallHandle(vm, "add(_,_)");
+		var point:WrenHandle = Wren.makeCallHandle(vm, "testPoint()");
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
@@ -49,6 +53,11 @@ class Test {
 		Wren.setSlotDouble(vm, 2, 58);
 		Wren.call(vm, add);
 		trace('add result: ${Wren.getSlotDouble(vm, 0)} (should be 100)');
+		
+		
+		Wren.ensureSlots(vm, 1);
+		Wren.setSlotHandle(vm, 0, callClass);
+		Wren.call(vm, point);
 	
 		Wren.releaseHandle(vm, callClass);
 		Wren.releaseHandle(vm, noParams);
@@ -86,18 +95,64 @@ function bindForeignMethodFn(
 	isStatic:Bool,
 	signature:cpp.ConstCharStar
 ):WrenForeignMethodFn {
-	trace('bindForeignMethodFn', (module:String), (className:String), isStatic, (signature:String));
-	
 	if(module == 'main' && className == 'Call' && isStatic && signature == 'add(_,_)') {
 		return cpp.Callable.fromStaticFunction(add);
 	}
+	if(module == 'main' && className == 'Point' && signature == 'print()') {
+		return cpp.Callable.fromStaticFunction(instance);
+	}
 	return null;
+}
+
+function bindForeignClassFn(
+	vm:RawWrenVM,
+	module:cpp.ConstCharStar,
+	className:cpp.ConstCharStar
+):WrenForeignClassMethods {
+	trace('bindForeignClass', (module:String), (className:String));
+	final methods = WrenForeignClassMethods.init();
+	
+	if(module == 'main' && className == 'Point') {
+		methods.allocate = cpp.Callable.fromStaticFunction(allocatePoint);
+		methods.finalize = cpp.Callable.fromStaticFunction(finalizePoint);
+	}
+	
+	return methods;
 }
 
 function add(vm:RawWrenVM) {
 	var a = Wren.getSlotDouble(vm, 1);
 	var b = Wren.getSlotDouble(vm, 2);
 	Wren.setSlotDouble(vm, 0, a + b);
+}
+
+function instance(vm:RawWrenVM) {
+	var inst:cpp.Pointer<Point> = cast Wren.getSlotForeign(vm, 0);
+	trace('invoking instance print', inst.value.toString());
+}
+
+function allocatePoint(vm:RawWrenVM) {
+	trace('allocatePoint');
+	var point = new Point();
+	final ptr:cpp.Pointer<Point> = Wren.setSlotNewForeign(vm, 0, 0, untyped __cpp__('sizeof(::Dynamic)'));
+	cpp.Native.set((cast ptr:cpp.Star<Point>), point);
+	// TODO: GCAddRoot
+}
+
+function finalizePoint(data:cpp.RawPointer<Void>) {
+	trace('finalizePoint');
+	var inst:cpp.Pointer<Point> = cast data;
+	trace('finalizing', inst.value.toString());
+	// TODO: GCRemoveRoot
+}
+
+class Point {
+	public function new() {
+		trace('new Point');
+	}
+	public function toString() {
+		return 'My Point';
+	}
 }
 
 

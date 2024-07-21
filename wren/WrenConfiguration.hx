@@ -4,6 +4,7 @@ import wren.WrenVM;
 
 @:structAccess
 @:native('WrenConfiguration')
+@:include('linc_wren.h')
 extern class WrenConfiguration {
 	// TODO: WrenReallocateFn reallocateFn
 	// TODO: WrenResolveModuleFn resolveModuleFn
@@ -19,7 +20,7 @@ extern class WrenConfiguration {
 		vm:RawWrenVM,
 		module:cpp.ConstCharStar,
 		className:cpp.ConstCharStar
-	)->Void>;
+	)->WrenForeignClassMethods>;
 	public var writeFn:cpp.Callable<(
 		vm:RawWrenVM,
 		text:cpp.ConstCharStar
@@ -38,13 +39,4 @@ extern class WrenConfiguration {
 	
 	@:native('linc::wren::initConfiguration')
 	public static function init():WrenConfiguration;
-}
-
-@:native('WrenForeignMethodFn')
-extern class WrenForeignMethodFnNative {}
-abstract WrenForeignMethodFn(WrenForeignMethodFnNative) {
-	@:from
-	static inline function fromCallable(f:cpp.Callable<(vm:RawWrenVM)->Void>) {
-		return cast f;
-	}
 }

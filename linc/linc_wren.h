@@ -24,8 +24,11 @@ namespace linc {
 			return config;
 		}
 		
-		inline cpp::Struct<WrenConfiguration> wrapConfiguration(WrenConfiguration &config) {
-			return config;
+		inline WrenForeignClassMethods initForeignClassMethods() {
+			WrenForeignClassMethods methods;
+			methods.allocate = NULL;
+			methods.finalize = NULL;
+			return methods;
 		}
 
     } //wren
