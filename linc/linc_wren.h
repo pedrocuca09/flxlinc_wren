@@ -13,8 +13,20 @@ namespace linc {
 
     namespace wren {
 
-        extern WrenVM* newVM(Dynamic _config);
+        extern WrenVM* newVM(WrenConfiguration &config);
         extern ::String getSlotString(WrenVM* vm, int slot);
+        
+        
+		
+		inline WrenConfiguration initConfiguration() {
+			WrenConfiguration config;
+			wrenInitConfiguration(&config);
+			return config;
+		}
+		
+		inline cpp::Struct<WrenConfiguration> wrapConfiguration(WrenConfiguration &config) {
+			return config;
+		}
 
     } //wren
 

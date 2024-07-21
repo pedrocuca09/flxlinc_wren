@@ -66,25 +66,27 @@ namespace linc {
 
 		};
 
-        WrenVM* newVM(Dynamic _config) {
+        WrenVM* newVM(WrenConfiguration &config) {
 
-			WrenConfiguration config;
-			wrenInitConfiguration(&config);
+			// wrenInitConfiguration(config);
 
-			config.writeFn = writeFn;
+			// config.writeFn = writeFn;
 			// config.loadModuleFn = loadModuleFn;
 
-            if(_config != null()) {
-            	if (_config->__FieldRef(HX_CSTRING("initialHeapSize")) != null()){
-					config.initialHeapSize = (int)_config->__FieldRef(HX_CSTRING("initialHeapSize"));
-            	}
-            	if (_config->__FieldRef(HX_CSTRING("minHeapSize")) != null()){
-					config.minHeapSize = (int)_config->__FieldRef(HX_CSTRING("minHeapSize"));
-            	}
-            	if (_config->__FieldRef(HX_CSTRING("heapGrowthPercent")) != null()){
-					config.heapGrowthPercent = _config->__FieldRef(HX_CSTRING("heapGrowthPercent"));
-            	}
-			}
+            // if(_config != null()) {
+            // 	// if (_config->__FieldRef(HX_CSTRING("writeFn")) != null()){
+			// 	// 	config.writeFn = (WrenWriteFn) ::cpp::Function<WrenWriteFn>(::hx::AnyCast(&_config->__FieldRef(HX_CSTRING("writeFn")) ));
+            // 	// }
+            // 	if (_config->__FieldRef(HX_CSTRING("initialHeapSize")) != null()){
+			// 		config.initialHeapSize = (int)_config->__FieldRef(HX_CSTRING("initialHeapSize"));
+            // 	}
+            // 	if (_config->__FieldRef(HX_CSTRING("minHeapSize")) != null()){
+			// 		config.minHeapSize = (int)_config->__FieldRef(HX_CSTRING("minHeapSize"));
+            // 	}
+            // 	if (_config->__FieldRef(HX_CSTRING("heapGrowthPercent")) != null()){
+			// 		config.heapGrowthPercent = _config->__FieldRef(HX_CSTRING("heapGrowthPercent"));
+            // 	}
+			// }
 
   			return wrenNewVM(&config);
 

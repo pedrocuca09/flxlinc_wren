@@ -15,7 +15,8 @@ extern class Wren {
 
 
 	@:native('linc::wren::newVM')
-	static function newVM(?config:WrenConfiguration) : WrenVM;
+	// @:native('wrenNewVM')
+	static function newVM(config:WrenConfiguration) : WrenVM;
 
 	@:native('wrenFreeVM')
 	static function freeVM(vm:WrenVM) : Void;
@@ -105,11 +106,12 @@ extern class Wren {
 } //Wren
 
 
-typedef WrenConfiguration = {
-	@:optional var initialHeapSize : UInt;
-	@:optional var minHeapSize : UInt;
-	@:optional var heapGrowthPercent : Int;
-} //WrenConfiguration
+// typedef WrenConfiguration = {
+// 	// final ?writeFn : Callable<(vm:WrenVM, text:String) -> Void>;
+// 	final ?initialHeapSize : UInt;
+// 	final ?minHeapSize : UInt;
+// 	final ?heapGrowthPercent : Int;
+// } //WrenConfiguration
 
 
 @:enum
