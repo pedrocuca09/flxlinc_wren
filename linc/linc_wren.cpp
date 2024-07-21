@@ -72,7 +72,7 @@ namespace linc {
 			wrenInitConfiguration(&config);
 
 			config.writeFn = writeFn;
-			config.loadModuleFn = loadModuleFn;
+			// config.loadModuleFn = loadModuleFn;
 
             if(_config != null()) {
             	if (_config->__FieldRef(HX_CSTRING("initialHeapSize")) != null()){

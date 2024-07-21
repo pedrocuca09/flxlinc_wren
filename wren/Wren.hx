@@ -24,7 +24,7 @@ extern class Wren {
 	static function collectGarbage(vm:WrenVM) : Void;
 
 	@:native('wrenInterpret')
-	static function interpret(vm:WrenVM, source:String) : WrenInterpretResult;
+	static function interpret(vm:WrenVM, module:String, source:String) : WrenInterpretResult;
 
 	@:native('wrenMakeCallHandle')
 	static function makeCallHandle(vm:WrenVM, signature:String) : WrenHandle;
@@ -115,20 +115,21 @@ typedef WrenConfiguration = {
 @:enum
 abstract WrenInterpretResult(Int)
 from Int to Int {
-	var WREN_RESULT_SUCCESS        = 0;
-	var WREN_RESULT_COMPILE_ERROR  = 1;
-	var WREN_RESULT_RUNTIME_ERROR  = 2;
+	@:native('WREN_RESULT_SUCCESS') var WREN_RESULT_SUCCESS;
+	@:native('WREN_RESULT_COMPILE_ERROR') var WREN_RESULT_COMPILE_ERROR;
+	@:native('WREN_RESULT_RUNTIME_ERROR') var WREN_RESULT_RUNTIME_ERROR;
 } //WrenInterpretResult
 
 
 @:enum
 abstract WrenType(Int)
 from Int to Int {
-	var WREN_TYPE_BOOL        = 0;
-	var WREN_TYPE_NUM         = 1;
-	var WREN_TYPE_FOREIGN     = 2;
-	var WREN_TYPE_LIST        = 3;
-	var WREN_TYPE_NULL        = 4;
-	var WREN_TYPE_STRING      = 5;
-	var WREN_TYPE_UNKNOWN     = 6;
+	@:native('WREN_TYPE_BOOL') var WREN_TYPE_BOOL;
+	@:native('WREN_TYPE_NUM') var WREN_TYPE_NUM;
+	@:native('WREN_TYPE_FOREIGN') var WREN_TYPE_FOREIGN;
+	@:native('WREN_TYPE_LIST') var WREN_TYPE_LIST;
+	@:native('WREN_TYPE_MAP') var WREN_TYPE_MAP;
+	@:native('WREN_TYPE_NULL') var WREN_TYPE_NULL;
+	@:native('WREN_TYPE_STRING') var WREN_TYPE_STRING;
+	@:native('WREN_TYPE_UNKNOWN') var WREN_TYPE_UNKNOWN;
 } //WrenType
