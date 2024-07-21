@@ -114,18 +114,35 @@ extern class Wren {
 // } //WrenConfiguration
 
 
-@:enum
-abstract WrenInterpretResult(Int)
-from Int to Int {
+@:unreflective
+@:native('WrenInterpretResult')
+extern class WrenInterpretResultNative {}
+
+@:include('linc_wren.h')
+extern enum abstract WrenInterpretResult(WrenInterpretResultNative) {
 	@:native('WREN_RESULT_SUCCESS') var WREN_RESULT_SUCCESS;
 	@:native('WREN_RESULT_COMPILE_ERROR') var WREN_RESULT_COMPILE_ERROR;
 	@:native('WREN_RESULT_RUNTIME_ERROR') var WREN_RESULT_RUNTIME_ERROR;
-} //WrenInterpretResult
+}
+
+@:unreflective
+@:native('WrenErrorType')
+extern class WrenErrorTypeNative {}
+
+@:include('linc_wren.h')
+extern enum abstract WrenErrorType(WrenErrorTypeNative) {
+	@:native('WREN_ERROR_COMPILE') var WREN_ERROR_COMPILE;
+	@:native('WREN_ERROR_RUNTIME') var WREN_ERROR_RUNTIME;
+	@:native('WREN_ERROR_STACK_TRACE') var WREN_ERROR_STACK_TRACE;
+}
 
 
-@:enum
-abstract WrenType(Int)
-from Int to Int {
+@:unreflective
+@:native('WrenType')
+extern class WrenTypeNative {}
+
+@:include('linc_wren.h')
+extern enum abstract WrenType(WrenTypeNative) {
 	@:native('WREN_TYPE_BOOL') var WREN_TYPE_BOOL;
 	@:native('WREN_TYPE_NUM') var WREN_TYPE_NUM;
 	@:native('WREN_TYPE_FOREIGN') var WREN_TYPE_FOREIGN;
@@ -134,4 +151,4 @@ from Int to Int {
 	@:native('WREN_TYPE_NULL') var WREN_TYPE_NULL;
 	@:native('WREN_TYPE_STRING') var WREN_TYPE_STRING;
 	@:native('WREN_TYPE_UNKNOWN') var WREN_TYPE_UNKNOWN;
-} //WrenType
+}

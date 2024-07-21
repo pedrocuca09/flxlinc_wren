@@ -13,6 +13,8 @@ class Call {
 	static one(one) {
 		System.print("one %(one)")
 	}
+	
+	foreign static add(a, b)
 
 }
 

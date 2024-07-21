@@ -1,7 +1,7 @@
 -lib linc_wren
 -main Test.hx
--cpp cpp/
--cp ../
+-cpp test/cpp/
+-cp test
 # pick a target
 
 #-D mac
