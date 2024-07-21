@@ -72,15 +72,15 @@ class Test {
 
 }
 
-function writeFn(vm:cpp.RawPointer<wren.RawWrenVM>, text:cpp.ConstCharStar) {
+function writeFn(vm:RawWrenVM, text:cpp.ConstCharStar) {
 	trace((text:String));
 }
-function errorFn(vm:cpp.RawPointer<wren.RawWrenVM>, type:WrenErrorType, module:cpp.ConstCharStar, line:Int, message:cpp.ConstCharStar) {
+function errorFn(vm:RawWrenVM, type:WrenErrorType, module:cpp.ConstCharStar, line:Int, message:cpp.ConstCharStar) {
 	trace(type, (module:String), line, (message:String));
 }
 
 function bindForeignMethodFn(
-	vm:cpp.RawPointer<RawWrenVM>,
+	vm:RawWrenVM,
 	module:cpp.ConstCharStar,
 	className:cpp.ConstCharStar,
 	isStatic:Bool,
@@ -94,10 +94,10 @@ function bindForeignMethodFn(
 	return null;
 }
 
-function add(vm:cpp.RawPointer<RawWrenVM>) {
-	var a = Wren.getSlotDouble(cast vm, 1);
-	var b = Wren.getSlotDouble(cast vm, 2);
-	Wren.setSlotDouble(cast vm, 0, a + b);
+function add(vm:RawWrenVM) {
+	var a = Wren.getSlotDouble(vm, 1);
+	var b = Wren.getSlotDouble(vm, 2);
+	Wren.setSlotDouble(vm, 0, a + b);
 }
 
 
