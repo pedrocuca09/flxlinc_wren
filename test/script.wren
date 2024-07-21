@@ -20,10 +20,10 @@ class Call {
 	}
 	
 	static stress() {
-		var total = 1000
+		var total = 10000
 		System.print("stress start (%(total))")
 		for (i in 1..total) {
-			if(i % 100 == 0) {
+			if(i % 2000 == 0) {
 				System.print("checkpoint %(i)")
 			}
 			alloc()
@@ -33,6 +33,7 @@ class Call {
 	
 	static alloc() {
 		var p = Point.new()
+		p.print()
 	}
 	
 	foreign static add(a, b)
@@ -40,6 +41,6 @@ class Call {
 }
 
 foreign class Point {
-  construct new() {}
-  foreign print()
+	construct new() {}
+	foreign print()
 }

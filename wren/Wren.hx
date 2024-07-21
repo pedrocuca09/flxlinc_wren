@@ -55,7 +55,7 @@ extern class Wren {
 	static function getSlotDouble(vm:WrenVM, slot:Int) : Float;
 
 	@:native('wrenGetSlotForeign')
-	static function getSlotForeign<T>(vm:WrenVM, slot:Int) : cpp.RawPointer<T>;
+	static function getSlotForeign(vm:WrenVM, slot:Int) : cpp.RawPointer<Void>;
 
 	@:native('linc::wren::getSlotString')
 	static function getSlotString(vm:WrenVM, slot:Int) : String;
@@ -73,7 +73,7 @@ extern class Wren {
 	static function setSlotDouble(vm:WrenVM, slot:Int, value:Float) : Void;
 
 	@:native('wrenSetSlotNewForeign')
-	static function setSlotNewForeign<T>(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.RawPointer<T>;
+	static function setSlotNewForeign(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.RawPointer<Void>;
 
 	@:native('wrenSetSlotNewList')
 	static function setSlotNewList(vm:WrenVM, slot:Int) : Void;
@@ -102,9 +102,16 @@ extern class Wren {
 	@:native('wrenAbortFiber')
 	static function abortFiber(vm:WrenVM, slot:Int) : Void;
 	
+	/**
+		Allocate memory via wrenSetSlotNewForeign and then store the given Haxe obj to it
+		Also add the Haxe obj to GC root to retain it. Call `unroot` on the pointer when done.
+	**/
 	@:native('linc::wren::setSlotNewForeignDynamic')
 	static function setSlotNewForeignDynamic<T>(vm:WrenVM, slot:Int, classSlot:Int, obj:Dynamic) : Void;
 	
+	/**
+		Remove GC root for the given pointer
+	**/
 	@:native('linc::wren::unroot')
 	static function unroot<T>(ptr:cpp.RawPointer<Void>) : Void;
 	

@@ -60,7 +60,7 @@ class Test {
 		Wren.setSlotHandle(vm, 0, callClass);
 		Wren.call(vm, point);
 		
-		for(i in 0...10) {
+		for(i in 0...100) {
 			Wren.ensureSlots(vm, 1);
 			Wren.setSlotHandle(vm, 0, callClass);
 			final result = Wren.call(vm, stress);
@@ -86,10 +86,10 @@ class Test {
 	static function debug() {
 		// trace('run gc'); cpp.vm.Gc.run(false);
 		// trace('compact'); cpp.vm.Gc.compact();
-		trace('MEM_INFO_USAGE', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_USAGE));
-		trace('MEM_INFO_RESERVED', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_RESERVED));
-		trace('MEM_INFO_CURRENT', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_CURRENT));
-		trace('MEM_INFO_LARGE', cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_LARGE));
+		trace('MEM_INFO_USAGE', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_USAGE):UInt));
+		trace('MEM_INFO_RESERVED', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_RESERVED):UInt));
+		trace('MEM_INFO_CURRENT', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_CURRENT):UInt));
+		trace('MEM_INFO_LARGE', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_LARGE):UInt));
 	}
 
 	static function main() {
@@ -152,10 +152,12 @@ function add(vm:RawWrenVM) {
 }
 
 function instance(vm:RawWrenVM) {
-	final ptr:cpp.Pointer<Point> = Wren.getSlotForeign(vm, 0);
+	final ptr = Wren.getSlotForeign(vm, 0);
 	final point = cpp.Native.get((cast ptr:cpp.Star<Point>));
-	if(point == null || point.toString() == null) {
+	if(point == null) {
 		throw 'invalid instance';
+	} else {
+		// point.print();
 	}
 
 }
@@ -168,7 +170,7 @@ var finalized = 0;
 function allocatePoint(vm:RawWrenVM) {
 	var point = new Point();
 	Wren.setSlotNewForeignDynamic(vm, 0, 0, point);
-	if(allocated < 10 || allocated % 100 == 0) {
+	if(allocated % 1000 == 0) {
 		trace('allocated', allocated);
 	}
 	allocated++;
@@ -177,7 +179,7 @@ function allocatePoint(vm:RawWrenVM) {
 
 function finalizePoint(ptr:cpp.RawPointer<Void>) {
 	Wren.unroot(ptr);
-	if(finalized % 100 == 0) {
+	if(finalized % 1000 == 0) {
 		trace('finalized', finalized);
 		
 	}
@@ -186,12 +188,12 @@ function finalizePoint(ptr:cpp.RawPointer<Void>) {
 
 class Point {
 	@:keep
-	final data = [for(i in 0...1000000) i];
+	final data = [for(i in 0...100) i];
 	public function new() {
 		// trace('new Point');
 	}
-	public function toString() {
-		return 'My Point';
+	public function print() {
+		trace('My Point');
 	}
 }
 

@@ -1,6 +1,6 @@
 #ifndef _LINC_WREN_H_
 #define _LINC_WREN_H_
-    
+	
 // #include "../lib/____"
 
 #include <hxcpp.h>
@@ -11,13 +11,13 @@ extern "C" {
 
 namespace linc {
 
-    namespace wren {
+	namespace wren {
 
-        extern WrenVM* newVM(WrenConfiguration &config);
-        extern ::String getSlotString(WrenVM* vm, int slot);
-        extern void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
+		extern WrenVM* newVM(WrenConfiguration &config);
+		extern ::String getSlotString(WrenVM* vm, int slot);
+		extern void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
 		extern void unroot(void* ptr);
-        
+		
 		
 		inline WrenConfiguration initConfiguration() {
 			WrenConfiguration config;
@@ -32,7 +32,7 @@ namespace linc {
 			return methods;
 		}
 
-    } //wren
+	} //wren
 
 } //linc
 

@@ -2,14 +2,14 @@
 	"name": "linc-wren",
 	"license": "MIT",
 	"tags": [
-	  "linc",
-	  "wren"
+		"linc",
+		"wren"
 	],
 	"classPath": "",
 	"contributors": [
-	  "kevinresol"
+		"kevinresol"
 	],
 	"releasenote": "initial release",
 	"version": "0.0.0",
 	"dependencies": {}
-  }
+}
