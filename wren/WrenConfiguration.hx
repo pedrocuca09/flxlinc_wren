@@ -1,6 +1,10 @@
 package wren;
 
 import wren.WrenVM;
+import cpp.ConstCharStar;
+import cpp.Callable;
+import cpp.SizeT;
+import cpp.RawPointer;
 
 @:structAccess
 @:native('WrenConfiguration')
@@ -8,34 +12,37 @@ import wren.WrenVM;
 extern class WrenConfiguration {
 	// TODO: WrenReallocateFn reallocateFn
 	// TODO: WrenResolveModuleFn resolveModuleFn
-	// TODO: WrenLoadModuleFn loadModuleFn
-	public var bindForeignMethodFn:cpp.Callable<(
+	public var loadModuleFn:Callable<(
 		vm:RawWrenVM,
-		module:cpp.ConstCharStar,
-		className:cpp.ConstCharStar,
+		name:ConstCharStar
+	)->WrenLoadModuleResult>;
+	public var bindForeignMethodFn:Callable<(
+		vm:RawWrenVM,
+		module:ConstCharStar,
+		className:ConstCharStar,
 		isStatic:Bool,
-		signature:cpp.ConstCharStar
+		signature:ConstCharStar
 	)->WrenForeignMethodFn>;
-	public var bindForeignClassFn:cpp.Callable<(
+	public var bindForeignClassFn:Callable<(
 		vm:RawWrenVM,
-		module:cpp.ConstCharStar,
-		className:cpp.ConstCharStar
+		module:ConstCharStar,
+		className:ConstCharStar
 	)->WrenForeignClassMethods>;
-	public var writeFn:cpp.Callable<(
+	public var writeFn:Callable<(
 		vm:RawWrenVM,
-		text:cpp.ConstCharStar
+		text:ConstCharStar
 	)->Void>;
-	public var errorFn:cpp.Callable<(
+	public var errorFn:Callable<(
 		vm:RawWrenVM,
 		type:wren.Wren.WrenErrorType,
-		module:cpp.ConstCharStar,
+		module:ConstCharStar,
 		line:Int, 
-		message:cpp.ConstCharStar
+		message:ConstCharStar
 	)->Void>;
-	public var initialHeapSize : cpp.SizeT;
-	public var minHeapSize : cpp.SizeT;
+	public var initialHeapSize : SizeT;
+	public var minHeapSize : SizeT;
 	public var heapGrowthPercent : Int;
-	public var userData: cpp.RawPointer<Void>;
+	public var userData: RawPointer<Void>;
 	
 	@:native('linc::wren::initConfiguration')
 	public static function init():WrenConfiguration;

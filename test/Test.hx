@@ -4,6 +4,7 @@ import wren.WrenHandle;
 import wren.WrenConfiguration;
 import wren.WrenForeignMethodFn;
 import wren.WrenForeignClassMethods;
+import wren.WrenLoadModuleResult;
 
 class Test {
 	function new() {
@@ -13,6 +14,7 @@ class Test {
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
 		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
+		conf.loadModuleFn = cpp.Callable.fromStaticFunction(loadModuleFn);
 		final vm:WrenVM = Wren.newVM(conf);
 	
 		final file:String = sys.io.File.getContent("test/script.wren");
@@ -26,14 +28,15 @@ class Test {
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.getVariable(vm, "main", "Call", 0);
-		final callClass:WrenHandle = Wren.getSlotHandle(vm, 0);
+		final callClass = Wren.getSlotHandle(vm, 0);
 	
-		final noParams:WrenHandle = Wren.makeCallHandle(vm, "noParams");
-		final zero:WrenHandle = Wren.makeCallHandle(vm, "zero()");
-		final one:WrenHandle = Wren.makeCallHandle(vm, "one(_)");
-		final add:WrenHandle = Wren.makeCallHandle(vm, "add(_,_)");
-		final point:WrenHandle = Wren.makeCallHandle(vm, "point()");
-		final stress:WrenHandle = Wren.makeCallHandle(vm, "stress()");
+		final noParams = Wren.makeCallHandle(vm, "noParams");
+		final zero = Wren.makeCallHandle(vm, "zero()");
+		final one = Wren.makeCallHandle(vm, "one(_)");
+		final add = Wren.makeCallHandle(vm, "add(_,_)");
+		final point = Wren.makeCallHandle(vm, "point()");
+		final stress = Wren.makeCallHandle(vm, "stress()");
+		final module = Wren.makeCallHandle(vm, "module()");
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
@@ -60,13 +63,18 @@ class Test {
 		Wren.setSlotHandle(vm, 0, callClass);
 		Wren.call(vm, point);
 		
-		for(i in 0...100) {
-			Wren.ensureSlots(vm, 1);
-			Wren.setSlotHandle(vm, 0, callClass);
-			final result = Wren.call(vm, stress);
-			Wren.collectGarbage(vm);
-			debug();
-		}
+		Wren.ensureSlots(vm, 1);
+		Wren.setSlotHandle(vm, 0, callClass);
+		Wren.call(vm, module);
+		trace('module result: "${Wren.getSlotString(vm, 0)}" (should be "Module: another")');
+		
+		// for(i in 0...100) {
+		// 	Wren.ensureSlots(vm, 1);
+		// 	Wren.setSlotHandle(vm, 0, callClass);
+		// 	final result = Wren.call(vm, stress);
+		// 	Wren.collectGarbage(vm);
+		// 	debug();
+		// }
 	
 		Wren.releaseHandle(vm, callClass);
 		Wren.releaseHandle(vm, noParams);
@@ -143,6 +151,20 @@ function bindForeignClassFn(
 	}
 	
 	return methods;
+}
+
+function loadModuleFn(
+	vm:RawWrenVM,
+	name:cpp.ConstCharStar
+):WrenLoadModuleResult {
+	final result = WrenLoadModuleResult.init();
+	result.source = 'class ${captialCase(name)} { static name { "Module: $name" } }';
+	// TODO: may need to retain the source string in GC and free it in the onComplete callback
+	return result;
+}
+
+function captialCase(v:String) {
+	return v.charAt(0).toUpperCase() + v.substr(1);
 }
 
 function add(vm:RawWrenVM) {

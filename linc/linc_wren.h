@@ -31,6 +31,12 @@ namespace linc {
 			methods.finalize = NULL;
 			return methods;
 		}
+		
+		inline WrenLoadModuleResult initLoadModuleResult() {
+			WrenLoadModuleResult result;
+			result.onComplete = NULL;
+			return result;
+		}
 
 	} //wren
 

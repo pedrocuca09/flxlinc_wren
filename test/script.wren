@@ -36,6 +36,13 @@ class Call {
 		p.print()
 	}
 	
+	static module() {
+		import "other" for Other
+		System.print(Other.name)
+		import "another" for Another
+		return Another.name
+	}
+	
 	foreign static add(a, b)
 
 }
