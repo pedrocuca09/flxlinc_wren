@@ -25,15 +25,68 @@ class RunTests {
 	
 	function new() {}
 	
-	public function test() {
+	/**
+		Create a VM in C style. 
+		Configuration is created manually and passed to newVM.
+	**/
+	inline function newVM() {
 		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
 		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
 		conf.loadModuleFn = cpp.Callable.fromStaticFunction(loadModuleFn);
-		final vm = Wren.newVM(conf);
+		return Wren.newVM(conf);
+	}
 	
+	/**
+		Create a VM in haxe style. 
+		Configurations are passed as a haxe object.
+	**/
+	inline function makeVM() {
+		return WrenVM.make({
+			writeFn: (_, v) -> Sys.print(v),
+			errorFn: (_, type, module, line, message) -> Sys.print('$type $module $line $message'),
+			loadModuleFn: (_, name) -> 'class ${capitalCase(name)} { static name { "Module: $name" } }',
+			bindForeignMethodFn: (vm, module, className, isStatic, signature) -> {
+				switch [module, className, isStatic, signature] {
+					case ['main', 'Call', true, 'add(_,_)']: cpp.Callable.fromStaticFunction(add);
+					case ['main', 'Point', false, 'print()']: cpp.Callable.fromStaticFunction(instance);
+					case _: null;
+				}
+			},
+			bindForeignClassFn:(vm:WrenVM, module:String, className:String) -> {
+				final ret = WrenForeignClassMethods.init();
+				
+				switch [module, className] {
+					case ['main', 'Point']:
+						ret.allocate = cpp.Callable.fromStaticFunction(allocatePoint);
+						ret.finalize = cpp.Callable.fromStaticFunction(finalizePoint);
+					case _: /* no-op */
+				}
+				
+				return ret;
+			}
+		});
+	}
+	
+	// public function testC() {
+	// 	final vm = newVM();
+	// 	test(vm, asserts);
+	// 	return asserts.done();
+		
+	// }
+	
+	// public function testHaxe() {
+	// 	final vm = makeVM();
+	// 	test(vm, asserts);
+	// 	return asserts.done();
+	// }
+	
+	// inline function test(vm:WrenVM, asserts:AssertionBuffer) {
+	public function test() {
+		final vm = makeVM();
+		
 		final file:String = sys.io.File.getContent("tests/script.wren");
 		final result = Wren.interpret(vm, 'main', file);
 		
@@ -100,10 +153,14 @@ class RunTests {
 		Wren.releaseHandle(vm, add);
 		Wren.releaseHandle(vm, point);
 		Wren.releaseHandle(vm, stress);
+		Wren.releaseHandle(vm, module);
 	
+		// TODO: free the retained config object from makeVM
 		Wren.freeVM(vm);
+		debug();
 		
 		return asserts.done();
+		
 	}
 	
 	static function debug() {

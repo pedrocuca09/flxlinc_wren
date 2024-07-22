@@ -10,4 +10,17 @@ extern class WrenForeignClassMethods {
 	
 	@:native('linc::wren::initForeignClassMethods')
 	public static function init():WrenForeignClassMethods;
+	
+	@:native('linc::hxwren::wrapForeignClassMethods')
+	public static function wrap(v:WrenForeignClassMethods):WrenForeignClassMethodsObject;
+}
+
+@:native('::cpp::Struct<WrenForeignClassMethods>')
+extern class WrenForeignClassMethodsObjectBase extends WrenForeignClassMethods {}
+
+abstract WrenForeignClassMethodsObject(WrenForeignClassMethodsObjectBase) from WrenForeignClassMethodsObjectBase to WrenForeignClassMethodsObjectBase {
+	@:from
+	static inline function fromNative(v:WrenForeignClassMethods) {
+		return WrenForeignClassMethods.wrap(v);
+	}
 }

@@ -45,6 +45,7 @@ namespace linc {
 		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
 		void unroot(void* ptr);
 		
+		extern ::cpp::Struct<WrenForeignClassMethods> wrapForeignClassMethods(const WrenForeignClassMethods &v);
 		
 	} // hxwren
 
