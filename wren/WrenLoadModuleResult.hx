@@ -16,6 +16,6 @@ extern class WrenLoadModuleResult {
 	@:native('linc::wren::initLoadModuleResult')
 	public static function init():WrenLoadModuleResult;
 	
-	@:native('linc::wren::makeLoadModuleResult')
+	@:native('linc::hxwren::makeLoadModuleResult')
 	public static function make(obj:{source:String, ?onComplete:(name:String)->Void}):WrenLoadModuleResult;
 }

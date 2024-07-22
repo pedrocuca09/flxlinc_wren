@@ -15,8 +15,6 @@ namespace linc {
 
 		extern WrenVM* newVM(WrenConfiguration &config);
 		extern ::String getSlotString(WrenVM* vm, int slot);
-		extern void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
-		extern void unroot(void* ptr);
 		
 		
 		inline WrenConfiguration initConfiguration() {
@@ -38,9 +36,17 @@ namespace linc {
 			return result;
 		}
 		
-		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj);
 
 	} //wren
+	
+	namespace hxwren {
+		WrenVM* makeVM(::Dynamic obj);
+		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj);
+		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
+		void unroot(void* ptr);
+		
+		
+	} // hxwren
 
 } //linc
 

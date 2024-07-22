@@ -17,7 +17,7 @@ class Test {
 		final vm:WrenVM = Wren.newVM(conf);
 	
 		final file:String = sys.io.File.getContent("test/script.wren");
-		final result = Wren.interpret(vm, 'main',  file);
+		final result = Wren.interpret(vm, 'main', file);
 		
 		switch result {
 			case WREN_RESULT_SUCCESS: trace('WREN_RESULT_SUCCESS');

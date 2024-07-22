@@ -106,13 +106,13 @@ extern class Wren {
 		Allocate memory via wrenSetSlotNewForeign and then store the given Haxe obj to it
 		Also add the Haxe obj to GC root to retain it. Call `unroot` on the pointer when done.
 	**/
-	@:native('linc::wren::setSlotNewForeignDynamic')
+	@:native('linc::hxwren::setSlotNewForeignDynamic')
 	static function setSlotNewForeignDynamic<T>(vm:WrenVM, slot:Int, classSlot:Int, obj:Dynamic) : Void;
 	
 	/**
 		Remove GC root for the given pointer
 	**/
-	@:native('linc::wren::unroot')
+	@:native('linc::hxwren::unroot')
 	static function unroot<T>(ptr:cpp.RawPointer<Void>) : Void;
 	
 

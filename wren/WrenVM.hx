@@ -6,7 +6,10 @@ import cpp.Reference;
 /** Reference form, mostly used for holding the reference in Haxe code **/
 @:native('::cpp::Reference<WrenVM>')
 @:include('linc_wren.h')
-extern class WrenVM {}
+extern class WrenVM {
+	@:native('linc::hxwren::makeVM')
+	static function make():WrenVM;
+}
 
 /** The real value type in C **/
 @:structAccess
