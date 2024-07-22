@@ -21,6 +21,9 @@ extern class WrenVM {
 		// {allocate: Callable<HaxeWrenForeignMethodFn>, finalize: Callable<HaxeWrenFinalizerFn>},
 	}):WrenVM;
 	
+	@:native('linc::hxwren::destroyVM')
+	static function destroyVM(vm:WrenVM):Void;
+	
 	static inline function make(config):WrenVMObject {
 		return makeVM(config);
 	}
@@ -50,8 +53,7 @@ class WrenVMObjectBase {
 	}
 	
 	static function finalize(vm:WrenVMObjectBase) {
-		final ptr = Wren.getUserData(vm.vm);
-		Wren.unroot(ptr);
+		WrenVM.destroyVM(vm.vm);
 	}
 }
 

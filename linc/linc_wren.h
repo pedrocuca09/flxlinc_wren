@@ -41,6 +41,8 @@ namespace linc {
 	
 	namespace hxwren {
 		WrenVM* makeVM(::Dynamic obj);
+		void destroyVM(WrenVM* vm);
+			
 		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj);
 		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
 		void unroot(void* ptr);

@@ -19,6 +19,7 @@ namespace linc {
 			return ::String(wrenGetSlotString(vm, slot));
 		}
 	} //wren
+	
 	namespace hxwren {
 		void writeFn(WrenVM* vm, const char* text) {
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
@@ -116,6 +117,11 @@ namespace linc {
 		}
 
 
+		/**
+		 * Create a VM from a Haxe object as configuration
+		 * The config object is stored in the VM's user data
+		 * Call destroyVM to release the object
+		 *  */
 		WrenVM* makeVM(::Dynamic obj) {
 			WrenConfiguration config;
 			wrenInitConfiguration(&config);
@@ -130,6 +136,14 @@ namespace linc {
 			::hx::GCAddRoot(root);
 			return wrenNewVM(&config);
 		}
+		
+		void destroyVM(WrenVM* vm) {
+			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
+			::hx::GCRemoveRoot(root);
+			free(root);
+			
+			wrenFreeVM(vm);
+		}
 
 		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
 			auto root = static_cast<::hx::Object**>(result.userData);
@@ -140,7 +154,7 @@ namespace linc {
 				onComplete(::String(name));
 			}
 			::hx::GCRemoveRoot(root);
-			free(result.userData);
+			free(root);
 		}
 		
 		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj) {
