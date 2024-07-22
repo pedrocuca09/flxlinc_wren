@@ -2,6 +2,10 @@
 <xml>
 	<set name="WREN" value="${LINC_WREN_PATH}/lib/wren" />
 
+	<files id="__main__">
+		<compilerflag value='-I${LINC_WREN_PATH}/linc'/>
+	</files>
+	
 	<files id='haxe'>
 
 		<compilerflag value='-I${LINC_WREN_PATH}/linc'/>

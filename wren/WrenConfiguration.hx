@@ -1,10 +1,12 @@
 package wren;
 
+import wren.Wren;
 import wren.WrenVM;
 import cpp.ConstCharStar;
 import cpp.Callable;
 import cpp.SizeT;
-import cpp.RawPointer;
+import cpp.Star;
+
 
 @:structAccess
 @:native('WrenConfiguration')
@@ -34,7 +36,7 @@ extern class WrenConfiguration {
 	)->Void>;
 	public var errorFn:Callable<(
 		vm:RawWrenVM,
-		type:wren.Wren.WrenErrorType,
+		type:NativeWrenErrorType,
 		module:ConstCharStar,
 		line:Int, 
 		message:ConstCharStar
@@ -42,7 +44,7 @@ extern class WrenConfiguration {
 	public var initialHeapSize : SizeT;
 	public var minHeapSize : SizeT;
 	public var heapGrowthPercent : Int;
-	public var userData: RawPointer<Void>;
+	public var userData: Star<cpp.Void>;
 	
 	@:native('linc::wren::initConfiguration')
 	public static function init():WrenConfiguration;

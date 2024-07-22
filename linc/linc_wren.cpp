@@ -22,6 +22,7 @@ namespace linc {
 	
 	namespace hxwren {
 		void writeFn(WrenVM* vm, const char* text) {
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -33,6 +34,7 @@ namespace linc {
 		}
 
 		void errorFn(WrenVM* vm, WrenErrorType type, const char* module, int line, const char* message) {
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -44,6 +46,7 @@ namespace linc {
 		}
 		
 		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -60,6 +63,7 @@ namespace linc {
 		WrenLoadModuleResult loadModuleFn(WrenVM* vm, const char* module) {
 			WrenLoadModuleResult result;
 			
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -87,6 +91,7 @@ namespace linc {
 		};
 		
 		WrenForeignMethodFn bindForeignMethodFn(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature) {
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -107,11 +112,13 @@ namespace linc {
 			ret.allocate = nullptr;
 			ret.finalize = nullptr;
 			
+			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("bindForeignClassFn"), HX_PROP_DYNAMIC);
+			
 			if (::hx::IsNotNull(fn)) {
 				::Dynamic dyn = fn(vm, ::String(module), ::String(className));
 				if (::hx::IsNotNull(dyn)) {
@@ -184,7 +191,11 @@ namespace linc {
 			if (::hx::IsNotNull( onComplete )) {
 				onComplete(::String(name));
 			}
+			
+			// release the object in GC
 			::hx::GCRemoveRoot(root);
+			
+			// free the memory (managed by us)
 			free(root);
 		}
 		
@@ -192,17 +203,29 @@ namespace linc {
 			WrenLoadModuleResult result;
 			result.onComplete = onMakeLoadModuleResultComplete;
 			result.source = ((::String)(obj->__Field(HX_CSTRING("source"), HX_PROP_DYNAMIC))).utf8_str();
+			
+			// allocate memory (managed by us)
 			result.userData = malloc(sizeof(::hx::Object*));
+			
+			// store the haxe object in the memory
 			auto root = static_cast<::hx::Object**>(result.userData);
 			*root = obj.mPtr;
+			
+			// and retain it in the GC
 			::hx::GCAddRoot(root);
+			
 			return result;
 		}
 		
 		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj) {
+			// allocate memory (managed by wren)
 			auto ptr = wrenSetSlotNewForeign(vm, slot, classSlot, sizeof(::hx::Object*));
+			
+			// store the haxe object in the memory
 			auto root = static_cast<::hx::Object**>(ptr);
 			*root = obj.mPtr;
+			
+			// and retain it in the GC
 			::hx::GCAddRoot(root);
 		}
 		

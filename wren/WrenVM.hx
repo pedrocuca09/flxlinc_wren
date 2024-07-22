@@ -3,7 +3,7 @@ package wren;
 import wren.WrenForeignMethodFn;
 import wren.WrenForeignClassMethods;
 import wren.Wren;
-import cpp.RawPointer;
+import cpp.Star;
 import cpp.Reference;
 import cpp.Callable;
 
@@ -36,7 +36,7 @@ extern class WrenVM {
 extern class NativeWrenVM {}
 
 /** Raw pointer form, mainly used for callback argument **/
-abstract RawWrenVM(RawPointer<NativeWrenVM>) from RawPointer<NativeWrenVM> to RawPointer<NativeWrenVM> {
+abstract RawWrenVM(Star<NativeWrenVM>) from Star<NativeWrenVM> to Star<NativeWrenVM> {
 	@:to
 	inline function toReference():WrenVM {
 		return cast (cast this : Reference<NativeWrenVM>);

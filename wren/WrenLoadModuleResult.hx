@@ -3,7 +3,7 @@ package wren;
 import wren.WrenVM;
 import cpp.ConstCharStar;
 import cpp.Callable;
-import cpp.RawPointer;
+import cpp.Star;
 
 @:structAccess
 @:native('WrenLoadModuleResult')
@@ -11,7 +11,7 @@ import cpp.RawPointer;
 extern class WrenLoadModuleResult {
 	public var source:ConstCharStar;
 	public var onComplete:WrenLoadModuleCompleteFn;
-	public var userData:RawPointer<Void>;
+	public var userData:Star<cpp.Void>;
 	
 	@:native('linc::wren::initLoadModuleResult')
 	public static function init():WrenLoadModuleResult;

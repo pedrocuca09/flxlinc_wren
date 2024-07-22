@@ -1,13 +1,13 @@
 package wren;
 
-import cpp.RawPointer;
+import cpp.Star;
 import cpp.Callable;
 
 @:native('WrenFinalizerFn')
 @:include('linc_wren.h')
 extern class NativeWrenFinalizerFn {}
 
-typedef HaxeWrenFinalizerFn = (data:RawPointer<Void>)->Void;
+typedef HaxeWrenFinalizerFn = (data:Star<cpp.Void>)->Void;
 
 abstract WrenFinalizerFn(NativeWrenFinalizerFn) {
 	@:from

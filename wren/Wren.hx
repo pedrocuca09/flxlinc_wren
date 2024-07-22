@@ -55,7 +55,7 @@ extern class Wren {
 	static function getSlotDouble(vm:WrenVM, slot:Int) : Float;
 
 	@:native('wrenGetSlotForeign')
-	static function getSlotForeign(vm:WrenVM, slot:Int) : cpp.RawPointer<Void>;
+	static function getSlotForeign(vm:WrenVM, slot:Int) : cpp.Star<cpp.Void>;
 
 	@:native('linc::wren::getSlotString')
 	static function getSlotString(vm:WrenVM, slot:Int) : String;
@@ -73,7 +73,7 @@ extern class Wren {
 	static function setSlotDouble(vm:WrenVM, slot:Int, value:Float) : Void;
 
 	@:native('wrenSetSlotNewForeign')
-	static function setSlotNewForeign(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.RawPointer<Void>;
+	static function setSlotNewForeign(vm:WrenVM, slot:Int, classSlot:Int, size:UInt) : cpp.Star<cpp.Void>;
 
 	@:native('wrenSetSlotNewList')
 	static function setSlotNewList(vm:WrenVM, slot:Int) : Void;
@@ -103,7 +103,7 @@ extern class Wren {
 	static function abortFiber(vm:WrenVM, slot:Int) : Void;
 	
 	@:native('wrenGetUserData')
-	static function getUserData(vm:WrenVM) : cpp.RawPointer<Void>;
+	static function getUserData(vm:WrenVM) : cpp.Star<cpp.Void>;
 	
 	/**
 		Allocate memory via wrenSetSlotNewForeign and then store the given Haxe obj to it
@@ -116,7 +116,7 @@ extern class Wren {
 		Remove GC root for the given pointer
 	**/
 	@:native('linc::hxwren::unroot')
-	static function unroot<T>(ptr:cpp.RawPointer<Void>) : Void;
+	static function unroot<T>(ptr:cpp.Star<cpp.Void>) : Void;
 	
 
 } //Wren
@@ -130,20 +130,31 @@ extern class Wren {
 // } //WrenConfiguration
 
 
+// ref: https://github.com/HaxeFoundation/hxcpp/blob/8eeeee784cca9a271c023030d56e3f6db426076c/test/native/tests/TestNativeEnum.hx
+@:native("cpp::Struct<WrenInterpretResult, cpp::EnumHandler>")
+extern class NativeWrenInterpretResult { }
 
-extern enum abstract WrenInterpretResult(Int) from Int to Int {
+extern enum abstract WrenInterpretResult(NativeWrenInterpretResult) {
 	@:native('WREN_RESULT_SUCCESS') var WREN_RESULT_SUCCESS;
 	@:native('WREN_RESULT_COMPILE_ERROR') var WREN_RESULT_COMPILE_ERROR;
 	@:native('WREN_RESULT_RUNTIME_ERROR') var WREN_RESULT_RUNTIME_ERROR;
 }
 
-extern enum abstract WrenErrorType(Int) from Int to Int {
+@:native("WrenErrorType")
+extern class NativeWrenErrorType { }
+@:native("cpp::Struct<WrenErrorType, cpp::EnumHandler>")
+extern class WrenErrorTypeStruct extends NativeWrenErrorType { }
+
+extern enum abstract WrenErrorType(WrenErrorTypeStruct) {
 	@:native('WREN_ERROR_COMPILE') var WREN_ERROR_COMPILE;
 	@:native('WREN_ERROR_RUNTIME') var WREN_ERROR_RUNTIME;
 	@:native('WREN_ERROR_STACK_TRACE') var WREN_ERROR_STACK_TRACE;
 }
 
-extern enum abstract WrenType(Int) from Int to Int {
+@:native("cpp::Struct<WrenType, cpp::EnumHandler>")
+extern class NativeWrenType { }
+
+extern enum abstract WrenType(NativeWrenType) {
 	@:native('WREN_TYPE_BOOL') var WREN_TYPE_BOOL;
 	@:native('WREN_TYPE_NUM') var WREN_TYPE_NUM;
 	@:native('WREN_TYPE_FOREIGN') var WREN_TYPE_FOREIGN;

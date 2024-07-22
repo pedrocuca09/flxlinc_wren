@@ -29,7 +29,7 @@ class RunTests {
 		Create a VM in C style. 
 		Configuration is created manually and passed to newVM.
 	**/
-	inline function newVM() {
+	function newVM() {
 		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
@@ -43,7 +43,7 @@ class RunTests {
 		Create a VM in haxe style. 
 		Configurations are passed as a haxe object.
 	**/
-	inline function makeVM() {
+	function makeVM() {
 		return WrenVM.make({
 			writeFn: (_, v) -> Sys.print(v),
 			errorFn: (_, type, module, line, message) -> Sys.print('$type $module $line $message'),
@@ -70,32 +70,27 @@ class RunTests {
 		});
 	}
 	
-	// public function testC() {
-	// 	final vm = newVM();
-	// 	test(vm, asserts);
-	// 	return asserts.done();
+	public function testC() {
+		final vm = newVM();
+		test(vm, asserts);
+		return asserts.done();
 		
-	// }
+	}
 	
-	// public function testHaxe() {
-	// 	final vm = makeVM();
-	// 	test(vm, asserts);
-	// 	return asserts.done();
-	// }
-	
-	// inline function test(vm:WrenVM, asserts:AssertionBuffer) {
-	public function test() {
+	public function testHaxe() {
 		final vm = makeVM();
+		test(vm, asserts);
+		return asserts.done();
+	}
+	
+	inline function test(vm:WrenVM, asserts:AssertionBuffer) {
+	// public function test() {
+		// final vm = makeVM();
+		final vm = newVM();
 		
 		final file:String = sys.io.File.getContent("tests/script.wren");
 		final result = Wren.interpret(vm, 'main', file);
 		
-		switch result {
-			case WREN_RESULT_SUCCESS: trace('WREN_RESULT_SUCCESS');
-			case WREN_RESULT_COMPILE_ERROR: trace('WREN_RESULT_COMPILE_ERROR');
-			case WREN_RESULT_RUNTIME_ERROR: trace('WREN_RESULT_RUNTIME_ERROR');
-		}
-	
 		Wren.ensureSlots(vm, 1);
 		Wren.getVariable(vm, "main", "Call", 0);
 		final callClass = Wren.getSlotHandle(vm, 0);
@@ -159,7 +154,7 @@ class RunTests {
 		Wren.freeVM(vm);
 		debug();
 		
-		return asserts.done();
+		// return asserts.done();
 		
 	}
 	
@@ -182,7 +177,8 @@ class RunTests {
 function writeFn(vm:RawWrenVM, text:cpp.ConstCharStar) {
 	trace((text:String));
 }
-function errorFn(vm:RawWrenVM, type:WrenErrorType, module:cpp.ConstCharStar, line:Int, message:cpp.ConstCharStar) {
+
+function errorFn(vm:RawWrenVM, type:NativeWrenErrorType, module:cpp.ConstCharStar, line:Int, message:cpp.ConstCharStar) {
 	trace(type, (module:String), line, (message:String));
 }
 
@@ -272,7 +268,7 @@ function allocatePoint(vm:RawWrenVM) {
 	
 }
 
-function finalizePoint(ptr:cpp.RawPointer<Void>) {
+function finalizePoint(ptr:cpp.Star<cpp.Void>) {
 	Wren.unroot(ptr);
 	if(finalized % 1000 == 0) {
 		trace('finalized', finalized);
