@@ -43,7 +43,7 @@ namespace linc {
 			}
 		}
 		
-		void _onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
@@ -65,17 +65,23 @@ namespace linc {
 			
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("loadModuleFn"), HX_PROP_DYNAMIC);
-			auto src = (::String)fn(vm, ::String(module));
+			auto dyn = fn(vm, ::String(module));
 			
-			// render the haxe string into a buffer
-			hx::strbuf* buffer = new hx::strbuf();
-			result.source = src.utf8_str(buffer);
-			
-			// set complete callback
-			result.onComplete = _onLoadModuleComplete;
-			
-			// store the buffer pointer for later release
-			result.userData = (void*)buffer;
+			if(::hx::IsNotNull(dyn)) {
+				auto src = (::String) dyn;
+				
+				// render the haxe string into a buffer
+				hx::strbuf* buffer = new hx::strbuf();
+				result.source = src.utf8_str(buffer);
+				
+				// set complete callback
+				result.onComplete = onLoadModuleComplete;
+				
+				// store the buffer pointer for later release
+				result.userData = (void*)buffer;
+			} else {
+				result.source = nullptr;
+			}
 			
 			return result;
 		};
@@ -88,17 +94,18 @@ namespace linc {
 			auto fn = config->__Field(HX_CSTRING("bindForeignMethodFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
 				::Dynamic f = fn(vm, ::String(module), ::String(className), isStatic, ::String(signature));
-				return static_cast<::cpp::Function<void (WrenVM*)>>(f);
+				if(::hx::IsNotNull(f)) {
+					return static_cast<::cpp::Function<void (WrenVM*)>>(f);
+				}
 			}
 			
-			return NULL;
+			return nullptr;
 		}
 		
 		WrenForeignClassMethods bindForeignClassFn(WrenVM* vm, const char* module, const char* className) {
 			WrenForeignClassMethods ret;
-			
-			ret.allocate = NULL;
-			ret.finalize = NULL;
+			ret.allocate = nullptr;
+			ret.finalize = nullptr;
 			
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
@@ -107,10 +114,12 @@ namespace linc {
 			auto fn = config->__Field(HX_CSTRING("bindForeignClassFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
 				::Dynamic dyn = fn(vm, ::String(module), ::String(className));
-				::cpp::Struct<WrenForeignClassMethods> m = dyn;
-				
-				ret.allocate = m.value.allocate;
-				ret.finalize = m.value.finalize;
+				if (::hx::IsNotNull(dyn)) {
+					::cpp::Struct<WrenForeignClassMethods> m = dyn;
+					
+					ret.allocate = m.value.allocate;
+					ret.finalize = m.value.finalize;
+				}
 			}
 			
 			return ret;
@@ -130,13 +139,35 @@ namespace linc {
 			config.loadModuleFn = loadModuleFn;
 			config.bindForeignMethodFn = bindForeignMethodFn;
 			config.bindForeignClassFn = bindForeignClassFn;
+			
+			auto initialHeapSize = obj->__FieldRef(HX_CSTRING("initialHeapSize"));
+			if (initialHeapSize != null()) {
+				config.initialHeapSize = (int)initialHeapSize;
+			}
+			
+			auto minHeapSize = obj->__FieldRef(HX_CSTRING("initialHeapSize"));
+			if (minHeapSize != null()) {
+				config.minHeapSize = (int)minHeapSize;
+			}
+			
+			auto heapGrowthPercent = obj->__FieldRef(HX_CSTRING("initialHeapSize"));
+			if (initialHeapSize = null()) {
+				config.heapGrowthPercent = (int)heapGrowthPercent;
+			}
+			
+			// store the haxe object in the VM's user data
+			// so the callbacks can access it
 			config.userData = malloc(sizeof(::hx::Object*));
 			auto root = static_cast<::hx::Object**>(config.userData);
 			*root = obj.mPtr;
 			::hx::GCAddRoot(root);
+			
 			return wrenNewVM(&config);
 		}
 		
+		/**
+		 * Free the retained haxe object and release the VM
+		 */
 		void destroyVM(WrenVM* vm) {
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			::hx::GCRemoveRoot(root);
@@ -145,7 +176,7 @@ namespace linc {
 			wrenFreeVM(vm);
 		}
 
-		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+		void onMakeLoadModuleResultComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
 			auto root = static_cast<::hx::Object**>(result.userData);
 			auto obj = *root;
 			
@@ -159,7 +190,7 @@ namespace linc {
 		
 		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj) {
 			WrenLoadModuleResult result;
-			result.onComplete = onLoadModuleComplete;
+			result.onComplete = onMakeLoadModuleResultComplete;
 			result.source = ((::String)(obj->__Field(HX_CSTRING("source"), HX_PROP_DYNAMIC))).utf8_str();
 			result.userData = malloc(sizeof(::hx::Object*));
 			auto root = static_cast<::hx::Object**>(result.userData);
