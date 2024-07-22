@@ -1,3 +1,5 @@
+package ;
+
 import wren.Wren;
 import wren.WrenVM;
 import wren.WrenHandle;
@@ -6,17 +8,33 @@ import wren.WrenForeignMethodFn;
 import wren.WrenForeignClassMethods;
 import wren.WrenLoadModuleResult;
 
-class Test {
-	function new() {
+import tink.unit.*;
+import tink.testrunner.*;
+
+using tink.CoreApi;
+
+@:asserts
+class RunTests {
+
+	static function main() {
+		Runner.run(TestBatch.make([
+			new RunTests(),
+		])).handle(Runner.exit);
+	}
+	
+	
+	function new() {}
+	
+	public function test() {
 		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
 		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
 		conf.loadModuleFn = cpp.Callable.fromStaticFunction(loadModuleFn);
-		final vm:WrenVM = Wren.newVM(conf);
+		final vm = Wren.newVM(conf);
 	
-		final file:String = sys.io.File.getContent("test/script.wren");
+		final file:String = sys.io.File.getContent("tests/script.wren");
 		final result = Wren.interpret(vm, 'main', file);
 		
 		switch result {
@@ -39,33 +57,33 @@ class Test {
 	
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.call(vm, noParams);
+		asserts.assert(Wren.call(vm, noParams) == WREN_RESULT_SUCCESS);
 		
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.call(vm, zero);
+		asserts.assert(Wren.call(vm, zero) == WREN_RESULT_SUCCESS);
 		
 		Wren.ensureSlots(vm, 2);
 		Wren.setSlotHandle(vm, 0, callClass);
 		Wren.setSlotDouble(vm, 1, 1.0);
-		Wren.call(vm, one);
+		asserts.assert(Wren.call(vm, one) == WREN_RESULT_SUCCESS);
 		
 		Wren.ensureSlots(vm, 2);
 		Wren.setSlotHandle(vm, 0, callClass);
 		Wren.setSlotDouble(vm, 1, 42);
 		Wren.setSlotDouble(vm, 2, 58);
-		Wren.call(vm, add);
-		trace('add result: ${Wren.getSlotDouble(vm, 0)} (should be 100)');
+		asserts.assert(Wren.call(vm, add) == WREN_RESULT_SUCCESS);
+		asserts.assert(Wren.getSlotDouble(vm, 0) == 100);
 		
 		
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.call(vm, point);
+		asserts.assert(Wren.call(vm, point) == WREN_RESULT_SUCCESS);
 		
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.call(vm, module);
-		trace('module result: "${Wren.getSlotString(vm, 0)}" (should be "Module: another")');
+		asserts.assert(Wren.call(vm, module) == WREN_RESULT_SUCCESS);
+		asserts.assert(Wren.getSlotString(vm, 0) == 'Module: another');
 		
 		// for(i in 0...100) {
 		// 	Wren.ensureSlots(vm, 1);
@@ -83,11 +101,9 @@ class Test {
 		Wren.releaseHandle(vm, point);
 		Wren.releaseHandle(vm, stress);
 	
-		debug();
-		trace('free vm start');
 		Wren.freeVM(vm);
-		trace('free vm done');
-		debug();
+		
+		return asserts.done();
 	}
 	
 	static function debug() {
@@ -97,13 +113,6 @@ class Test {
 		trace('MEM_INFO_RESERVED', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_RESERVED):UInt));
 		trace('MEM_INFO_CURRENT', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_CURRENT):UInt));
 		trace('MEM_INFO_LARGE', (cpp.vm.Gc.memInfo(cpp.vm.Gc.MEM_INFO_LARGE):UInt));
-	}
-
-	static function main() {
-		
-		final test = new Test();
-		// test.writeFn((null:Any), (null:Any));
-		
 	}
 
 	// function writeFn(vm:wren.RawWrenVM, text:cpp.ConstCharStar) {

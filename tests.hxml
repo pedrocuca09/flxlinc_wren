@@ -1,7 +1,11 @@
--lib linc_wren
--main Test.hx
--cpp test/cpp/
--cp test
+-cp tests
+-main RunTests
+-dce full
+-lib tink_unittest
+
+-D analyzer-optimize
+-D no-deprecation-warnings
+
 # pick a target
 
 #-D mac

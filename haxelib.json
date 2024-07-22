@@ -1,11 +1,10 @@
 {
-	"name": "linc-wren",
+	"name": "linc_wren",
 	"license": "MIT",
 	"tags": [
 		"linc",
 		"wren"
 	],
-	"classPath": "",
 	"contributors": [
 		"kevinresol"
 	],
