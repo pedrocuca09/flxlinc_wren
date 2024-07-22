@@ -8,7 +8,6 @@ import wren.WrenLoadModuleResult;
 
 class Test {
 	function new() {
-		
 		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
@@ -157,13 +156,21 @@ function loadModuleFn(
 	vm:RawWrenVM,
 	name:cpp.ConstCharStar
 ):WrenLoadModuleResult {
-	final result = WrenLoadModuleResult.init();
-	result.source = 'class ${captialCase(name)} { static name { "Module: $name" } }';
-	// TODO: may need to retain the source string in GC and free it in the onComplete callback
-	return result;
+	final name:String = name; // cast to haxe string
+	
+	return WrenLoadModuleResult.make({
+		source: 'class ${capitalCase(name)} { static name { "Module: $name" } }',
+		onComplete: (name:String) -> trace('load module complete: $name'),
+	});
+	
+	// final result = WrenLoadModuleResult.init();
+	// result.source = 'class ${capitalCase(name)} { static name { "Module: $name" } }';
+	// // cpp.Native.set((cast result.userData:cpp.Star<String>), name);
+	// // TODO: may need to retain the source string in GC and free it in the onComplete callback
+	// return result;
 }
 
-function captialCase(v:String) {
+inline function capitalCase(v:String) {
 	return v.charAt(0).toUpperCase() + v.substr(1);
 }
 

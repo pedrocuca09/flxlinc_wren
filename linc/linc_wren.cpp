@@ -103,11 +103,32 @@ namespace linc {
 			auto root = static_cast<::hx::Object**>(ptr);
 			*root = obj.mPtr;
 			::hx::GCAddRoot(root);
-			// return root;
 		}
 		
 		void unroot(void* ptr) {
 			::hx::GCRemoveRoot(static_cast<::hx::Object**>(ptr));
+		}
+		
+		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+			auto root = static_cast<::hx::Object**>(result.userData);
+			auto obj = *root;
+			::Dynamic onComplete = obj->__Field(HX_CSTRING("onComplete"), HX_PROP_DYNAMIC);
+			if (::hx::IsNotNull( onComplete )) {
+				onComplete(::String(name));
+			}
+			::hx::GCRemoveRoot(root);
+			free(result.userData);
+		}
+		
+		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj) {
+			WrenLoadModuleResult result;
+			result.onComplete = onLoadModuleComplete;
+			result.source = ((::String)(obj->__Field(HX_CSTRING("source"), HX_PROP_DYNAMIC))).utf8_str();
+			result.userData = malloc(sizeof(::hx::Object*));
+			auto root = static_cast<::hx::Object**>(result.userData);
+			*root = obj.mPtr;
+			::hx::GCAddRoot(root);
+			return result;
 		}
 
 	} //wren

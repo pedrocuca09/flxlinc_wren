@@ -37,6 +37,8 @@ namespace linc {
 			result.onComplete = NULL;
 			return result;
 		}
+		
+		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj);
 
 	} //wren
 
