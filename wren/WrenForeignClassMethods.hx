@@ -1,26 +1,30 @@
 package wren;
 
+typedef NativeWrenForeignClassMethods = wren.native.WrenForeignClassMethods;
 
-@:structAccess
-@:native('WrenForeignClassMethods')
-@:include('linc_wren.h')
-extern class WrenForeignClassMethods {
-	public var allocate:WrenForeignMethodFn;
-	public var finalize:WrenFinalizerFn;
-	
-	@:native('linc::wren::initForeignClassMethods')
-	public static function init():WrenForeignClassMethods;
-	
+// struct wrapper over native type to play nice with Dynamic
+@:native('::cpp::Struct<WrenForeignClassMethods>')
+extern class WrenForeignClassMethodsBase extends NativeWrenForeignClassMethods {
 	@:native('linc::hxwren::wrapForeignClassMethods')
-	public static function wrap(v:WrenForeignClassMethods):WrenForeignClassMethodsObject;
+	static function wrap(v:NativeWrenForeignClassMethods):WrenForeignClassMethods;
 }
 
-@:native('::cpp::Struct<WrenForeignClassMethods>')
-extern class WrenForeignClassMethodsObjectBase extends WrenForeignClassMethods {}
-
-abstract WrenForeignClassMethodsObject(WrenForeignClassMethodsObjectBase) from WrenForeignClassMethodsObjectBase to WrenForeignClassMethodsObjectBase {
+// abstract wrapper over the struct wrapper for better ergonomics in Haxe
+@:forward
+abstract WrenForeignClassMethods(WrenForeignClassMethodsBase) from WrenForeignClassMethodsBase to WrenForeignClassMethodsBase {
 	@:from
-	static inline function fromNative(v:WrenForeignClassMethods) {
-		return WrenForeignClassMethods.wrap(v);
+	static inline function fromNative(v:NativeWrenForeignClassMethods) {
+		return WrenForeignClassMethodsBase.wrap(v);
+	}
+	
+	public static inline function init():WrenForeignClassMethods {
+		return NativeWrenForeignClassMethods.init();
+	}
+	
+	public static inline function make(o:{allocate:WrenForeignMethodFn, finalize:WrenFinalizerFn}):WrenForeignClassMethods {
+		final ret = init();
+		ret.allocate = o.allocate;
+		ret.finalize = o.finalize;
+		return ret;
 	}
 }

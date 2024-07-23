@@ -25,29 +25,31 @@ namespace linc {
 		
 		inline WrenForeignClassMethods initForeignClassMethods() {
 			WrenForeignClassMethods methods;
-			methods.allocate = NULL;
-			methods.finalize = NULL;
+			methods.allocate = nullptr;
+			methods.finalize = nullptr;
 			return methods;
 		}
 		
 		inline WrenLoadModuleResult initLoadModuleResult() {
 			WrenLoadModuleResult result;
-			result.onComplete = NULL;
+			result.onComplete = nullptr;
 			return result;
 		}
+		
+		extern WrenLoadModuleResult makeLoadModuleResult(::String source);
 		
 
 	} //wren
 	
 	namespace hxwren {
-		WrenVM* makeVM(::Dynamic obj);
-		void destroyVM(WrenVM* vm);
+		extern WrenVM* makeVM(::Dynamic obj);
+		extern void destroyVM(WrenVM* vm);
 			
-		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj);
-		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
-		void unroot(void* ptr);
+		extern void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj);
+		extern void unroot(void* ptr);
 		
 		extern ::cpp::Struct<WrenForeignClassMethods> wrapForeignClassMethods(const WrenForeignClassMethods &v);
+		extern ::cpp::Struct<WrenConfiguration> wrapConfiguration(const WrenConfiguration &v);
 		
 	} // hxwren
 

@@ -6,6 +6,8 @@
 -D analyzer-optimize
 -D no-deprecation-warnings
 
+# -D HXCPP_VERBOSE
+
 # pick a target
 
 #-D mac

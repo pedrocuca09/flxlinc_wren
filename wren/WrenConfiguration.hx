@@ -1,51 +1,24 @@
 package wren;
 
-import wren.Wren;
-import wren.WrenVM;
-import cpp.ConstCharStar;
-import cpp.Callable;
-import cpp.SizeT;
-import cpp.Star;
 
+typedef NativeWrenConfiguration = wren.native.WrenConfiguration;
 
-@:structAccess
-@:native('WrenConfiguration')
-@:include('linc_wren.h')
-extern class WrenConfiguration {
-	// TODO: WrenReallocateFn reallocateFn
-	// TODO: WrenResolveModuleFn resolveModuleFn
-	public var loadModuleFn:Callable<(
-		vm:RawWrenVM,
-		name:ConstCharStar
-	)->WrenLoadModuleResult>;
-	public var bindForeignMethodFn:Callable<(
-		vm:RawWrenVM,
-		module:ConstCharStar,
-		className:ConstCharStar,
-		isStatic:Bool,
-		signature:ConstCharStar
-	)->WrenForeignMethodFn>;
-	public var bindForeignClassFn:Callable<(
-		vm:RawWrenVM,
-		module:ConstCharStar,
-		className:ConstCharStar
-	)->WrenForeignClassMethods>;
-	public var writeFn:Callable<(
-		vm:RawWrenVM,
-		text:ConstCharStar
-	)->Void>;
-	public var errorFn:Callable<(
-		vm:RawWrenVM,
-		type:NativeWrenErrorType,
-		module:ConstCharStar,
-		line:Int, 
-		message:ConstCharStar
-	)->Void>;
-	public var initialHeapSize : SizeT;
-	public var minHeapSize : SizeT;
-	public var heapGrowthPercent : Int;
-	public var userData: Star<cpp.Void>;
+// struct wrapper over native type to play nice with Dynamic
+@:native('::cpp::Struct<WrenConfiguration>')
+extern class WrenConfigurationBase extends NativeWrenConfiguration {
+	@:native('linc::hxwren::wrapConfiguration')
+	static function wrap(v:NativeWrenConfiguration):WrenConfiguration;
+}
+
+// abstract wrapper over the struct wrapper for better ergonomics in Haxe
+@:forward
+abstract WrenConfiguration(WrenConfigurationBase) from WrenConfigurationBase to WrenConfigurationBase {
+	@:from
+	static inline function fromNative(v:NativeWrenConfiguration) {
+		return WrenConfigurationBase.wrap(v);
+	}
 	
-	@:native('linc::wren::initConfiguration')
-	public static function init():WrenConfiguration;
+	public static inline function init():WrenConfiguration {
+		return NativeWrenConfiguration.init();
+	}
 }

@@ -18,6 +18,24 @@ namespace linc {
 		::String getSlotString(WrenVM* vm, int slot){
 			return ::String(wrenGetSlotString(vm, slot));
 		}
+		
+		void onLoadModuleResultComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+			// free the memory (managed by us)
+			delete static_cast<::hx::strbuf*>(result.userData);
+		}
+		
+		WrenLoadModuleResult makeLoadModuleResult(::String source) {
+			WrenLoadModuleResult result;
+			result.onComplete = onLoadModuleResultComplete;
+			
+			// allocate memory (managed by us)
+			auto buffer = new ::hx::strbuf();
+			result.userData = buffer;
+			result.source =  source.utf8_str(buffer);
+			
+			return result;
+		}
+		
 	} //wren
 	
 	namespace hxwren {
@@ -29,7 +47,7 @@ namespace linc {
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("writeFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
-				fn(vm, ::String(text));
+				fn((::cpp::Pointer<WrenVM>) vm, ::String(text));
 			}
 		}
 
@@ -41,7 +59,7 @@ namespace linc {
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("errorFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
-				fn(vm, type, ::String(module), line, ::String(message));
+				fn((::cpp::Pointer<WrenVM>) vm, type, ::String(module), line, ::String(message));
 			}
 		}
 		
@@ -53,7 +71,7 @@ namespace linc {
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("onLoadModuleComplete"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
-				fn(vm, ::String(name));
+				fn((::cpp::Pointer<WrenVM>) vm, ::String(name));
 			}
 			
 			// release the buffer
@@ -69,7 +87,7 @@ namespace linc {
 			
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("loadModuleFn"), HX_PROP_DYNAMIC);
-			auto dyn = fn(vm, ::String(module));
+			auto dyn = fn((::cpp::Pointer<WrenVM>) vm, ::String(module));
 			
 			if(::hx::IsNotNull(dyn)) {
 				auto src = (::String) dyn;
@@ -98,7 +116,7 @@ namespace linc {
 			// obtain and run the callback
 			auto fn = config->__Field(HX_CSTRING("bindForeignMethodFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
-				::Dynamic f = fn(vm, ::String(module), ::String(className), isStatic, ::String(signature));
+				::Dynamic f = fn((::cpp::Pointer<WrenVM>) vm, ::String(module), ::String(className), isStatic, ::String(signature));
 				if(::hx::IsNotNull(f)) {
 					return static_cast<::cpp::Function<void (WrenVM*)>>(f);
 				}
@@ -120,7 +138,7 @@ namespace linc {
 			auto fn = config->__Field(HX_CSTRING("bindForeignClassFn"), HX_PROP_DYNAMIC);
 			
 			if (::hx::IsNotNull(fn)) {
-				::Dynamic dyn = fn(vm, ::String(module), ::String(className));
+				::Dynamic dyn = fn((::cpp::Pointer<WrenVM>) vm, ::String(module), ::String(className));
 				if (::hx::IsNotNull(dyn)) {
 					::cpp::Struct<WrenForeignClassMethods> m = dyn;
 					
@@ -183,39 +201,6 @@ namespace linc {
 			wrenFreeVM(vm);
 		}
 
-		void onMakeLoadModuleResultComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
-			auto root = static_cast<::hx::Object**>(result.userData);
-			auto obj = *root;
-			
-			::Dynamic onComplete = obj->__Field(HX_CSTRING("onComplete"), HX_PROP_DYNAMIC);
-			if (::hx::IsNotNull( onComplete )) {
-				onComplete(::String(name));
-			}
-			
-			// release the object in GC
-			::hx::GCRemoveRoot(root);
-			
-			// free the memory (managed by us)
-			free(root);
-		}
-		
-		WrenLoadModuleResult makeLoadModuleResult(::Dynamic obj) {
-			WrenLoadModuleResult result;
-			result.onComplete = onMakeLoadModuleResultComplete;
-			result.source = ((::String)(obj->__Field(HX_CSTRING("source"), HX_PROP_DYNAMIC))).utf8_str();
-			
-			// allocate memory (managed by us)
-			result.userData = malloc(sizeof(::hx::Object*));
-			
-			// store the haxe object in the memory
-			auto root = static_cast<::hx::Object**>(result.userData);
-			*root = obj.mPtr;
-			
-			// and retain it in the GC
-			::hx::GCAddRoot(root);
-			
-			return result;
-		}
 		
 		void setSlotNewForeignDynamic(WrenVM* vm, int slot, int classSlot, ::Dynamic obj) {
 			// allocate memory (managed by wren)
@@ -233,9 +218,8 @@ namespace linc {
 			::hx::GCRemoveRoot(static_cast<::hx::Object**>(ptr));
 		}
 		
-		::cpp::Struct<WrenForeignClassMethods> wrapForeignClassMethods(const WrenForeignClassMethods &v) { 
-			return v;
-		}
+		::cpp::Struct<WrenForeignClassMethods> wrapForeignClassMethods(const WrenForeignClassMethods &v) { return v; }
+		::cpp::Struct<WrenConfiguration> wrapConfiguration(const WrenConfiguration &v) { return v; }
 	} //hxwren
 
 
