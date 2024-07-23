@@ -1,11 +1,7 @@
 package;
 
 import wren.WrenVM;
-import wren.WrenHandle;
-import wren.WrenConfiguration;
-import wren.WrenForeignMethodFn;
 import wren.WrenForeignClassMethods;
-import wren.WrenLoadModuleResult;
 import wren.WrenInterpretResult;
 
 @:asserts

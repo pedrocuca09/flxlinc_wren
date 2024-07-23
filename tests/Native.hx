@@ -9,11 +9,6 @@ import wren.native.WrenForeignClassMethods;
 import wren.native.WrenLoadModuleResult;
 import wren.native.WrenInterpretResult;
 
-import tink.unit.*;
-import tink.testrunner.*;
-
-using tink.CoreApi;
-
 @:asserts
 class Native {
 	public function new() {}
