@@ -55,6 +55,10 @@ jobs:
 
     - name: Install Haxe Libraries
       run: lix download
+      
+    # remove when new hxcpp released. see: https://github.com/HaxeFoundation/hxcpp/pull/1107
+    - name: Debug
+      run: pushd ~/haxe/haxe_libraries/hxcpp/4.3.0/github/01cfee282a9a783e10c5a7774a3baaf547e6b0a7/tools/hxcpp && haxe compile.hxml && popd
 
     - name: Run Test
       run: lix run travix ${{ matrix.target }}
