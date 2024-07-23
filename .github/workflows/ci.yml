@@ -20,7 +20,7 @@ jobs:
           - stable
           - nightly
         target:
-          - cpp
+          - cpp -D NO_PRECOMPILED_HEADERS
 
     steps:
     - name: Check Node.js Version
