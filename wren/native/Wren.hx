@@ -92,12 +92,36 @@ extern class Wren {
 	@:native('wrenGetListElement')
 	static function getListElement(vm:WrenVMStar, listSlot:Int, index:Int, elementSlot:Int) : Void;
 
+	@:native('wrenSetListElement')
+	static function setListElement(vm:WrenVMStar, listSlot:Int, index:Int, elementSlot:Int) : Void;
+
 	@:native('wrenInsertInList')
 	static function insertInList(vm:WrenVMStar, listSlot:Int, index:Int, elementSlot:Int) : Void;
+	
+	@:native('wrenGetMapCount')
+	static function getMapCount(vm:WrenVMStar, slot:Int) : Int;
+	
+	@:native('wrenGetMapContainsKey')
+	static function getMapContainsKey(vm:WrenVMStar, mapSlot:Int, keySlot:Int) : Bool;
+	
+	@:native('wrenGetMapValue')
+	static function getMapValue(vm:WrenVMStar, mapSlot:Int, keySlot:Int, valueSlot:Int) : Void;
+	
+	@:native('wrenSetMapValue')
+	static function setMapValue(vm:WrenVMStar, mapSlot:Int, keySlot:Int, valueSlot:Int) : Void;
+	
+	@:native('wrenRemoveMapValue')
+	static function removeMapValue(vm:WrenVMStar, mapSlot:Int, keySlot:Int, removedValueSlot:Int) : Void;
 
 	@:native('wrenGetVariable')
 	static function getVariable(vm:WrenVMStar, module:String, name:String, slot:Int) : Void;
 
+	@:native('wrenHasVariable')
+	static function hasVariable(vm:WrenVMStar, module:String, name:String) : Bool;
+	
+	@:native('wrenHasModule')
+	static function hasModule(vm:WrenVMStar, module:String) : Bool;
+	
 	@:native('wrenAbortFiber')
 	static function abortFiber(vm:WrenVMStar, slot:Int) : Void;
 	
