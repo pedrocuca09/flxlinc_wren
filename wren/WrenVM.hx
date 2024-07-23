@@ -18,7 +18,7 @@ extern abstract WrenVM(Pointer<Native>) from Pointer<Native> to Pointer<Native> 
 	
 	@:to
 	inline function toStar():Star<Native> {
-		return cast this.raw;
+		return this.ptr;
 	}
 
 	@:native('linc::hxwren::makeVM')
@@ -36,4 +36,66 @@ extern abstract WrenVM(Pointer<Native>) from Pointer<Native> to Pointer<Native> 
 	static inline function make(config):WrenVM {
 		return _make(config);
 	}
+	
+	
+	inline function collectGarbage():Void 
+		return wren.native.Wren.collectGarbage(this.ptr);
+	inline function interpret(module:String, source:String):WrenInterpretResult 
+		return wren.native.Wren.interpret(this.ptr, module, source);
+	inline function makeCallHandle(signature:String):WrenHandle 
+		return wren.native.Wren.makeCallHandle(this.ptr, signature);
+	inline function call(method:WrenHandle):WrenInterpretResult 
+		return wren.native.Wren.call(this.ptr, method);
+	inline function releaseHandle(value:WrenHandle):Void 
+		return wren.native.Wren.releaseHandle(this.ptr, value);
+	inline function getSlotCount():Int 
+		return wren.native.Wren.getSlotCount(this.ptr);
+	inline function ensureSlots(numSlots:Int):Void 
+		return wren.native.Wren.ensureSlots(this.ptr, numSlots);
+	inline function getSlotType(slot:Int):WrenType 
+		return wren.native.Wren.getSlotType(this.ptr, slot);
+	inline function getSlotBool(slot:Int):Bool 
+		return wren.native.Wren.getSlotBool(this.ptr, slot);
+	inline function getSlotBytes(slot:Int, length:Int):Bool 
+		return wren.native.Wren.getSlotBytes(this.ptr, slot, length);
+	inline function getSlotDouble(slot:Int):Float 
+		return wren.native.Wren.getSlotDouble(this.ptr, slot);
+	inline function getSlotForeign(slot:Int):cpp.Star<cpp.Void> 
+		return wren.native.Wren.getSlotForeign(this.ptr, slot);
+	inline function getSlotString(slot:Int):String 
+		return wren.native.Wren.getSlotString(this.ptr, slot);
+	inline function getSlotHandle(slot:Int):WrenHandle 
+		return wren.native.Wren.getSlotHandle(this.ptr, slot);
+	inline function setSlotBool(slot:Int, value:Bool):Void 
+		return wren.native.Wren.setSlotBool(this.ptr, slot, value);
+	inline function setSlotBytes(slot:Int, bytes:String, length:UInt):Void 
+		return wren.native.Wren.setSlotBytes(this.ptr, slot, bytes, length);
+	inline function setSlotDouble(slot:Int, value:Float):Void 
+		return wren.native.Wren.setSlotDouble(this.ptr, slot, value);
+	inline function setSlotNewForeign(slot:Int, classSlot:Int, size:UInt):cpp.Star<cpp.Void> 
+		return wren.native.Wren.setSlotNewForeign(this.ptr, slot, classSlot, size);
+	inline function setSlotNewForeignDynamic(slot:Int, classSlot:Int, obj:Dynamic):Void
+		return wren.native.Wren.setSlotNewForeignDynamic(this.ptr, slot, classSlot, obj);
+	inline function setSlotNewList(slot:Int):Void 
+		return wren.native.Wren.setSlotNewList(this.ptr, slot);
+	inline function setSlotNull(slot:Int):Void 
+		return wren.native.Wren.setSlotNull(this.ptr, slot);
+	inline function setSlotString(slot:Int, text:String):Void 
+		return wren.native.Wren.setSlotString(this.ptr, slot, text);
+	inline function setSlotHandle(slot:Int, value:WrenHandle):Void 
+		return wren.native.Wren.setSlotHandle(this.ptr, slot, value);
+	inline function getListCount(slot:Int):Int 
+		return wren.native.Wren.getListCount(this.ptr, slot);
+	inline function getListElement(listSlot:Int, index:Int, elementSlot:Int):Void 
+		return wren.native.Wren.getListElement(this.ptr, listSlot, index, elementSlot);
+	inline function insertInList(listSlot:Int, index:Int, elementSlot:Int):Void 
+		return wren.native.Wren.insertInList(this.ptr, listSlot, index, elementSlot);
+	inline function getVariable(module:String, name:String, slot:Int):Void 
+		return wren.native.Wren.getVariable(this.ptr, module, name, slot);
+	inline function abortFiber(slot:Int):Void 
+		return wren.native.Wren.abortFiber(this.ptr, slot);
+	inline function getUserData():cpp.Star<cpp.Void> 
+		return wren.native.Wren.getUserData(this.ptr);
+	inline function free():Void
+		return destroyVM(this);
 }

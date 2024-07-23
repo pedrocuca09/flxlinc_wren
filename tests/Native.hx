@@ -184,7 +184,7 @@ function instance(vm:cpp.Star<wren.native.WrenVM>) {
 }
 
 function allocatePoint(vm:cpp.Star<wren.native.WrenVM>) {
-	var point = new Point();
+	final point = new Point();
 	Wren.setSlotNewForeignDynamic(vm, 0, 0, point);
 	
 }

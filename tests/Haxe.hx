@@ -1,7 +1,5 @@
 package;
 
-
-import wren.native.Wren;
 import wren.WrenVM;
 import wren.WrenHandle;
 import wren.WrenConfiguration;
@@ -18,68 +16,68 @@ class Haxe {
 		final vm = create();
 		
 		final file:String = sys.io.File.getContent("tests/script.wren");
-		final result = Wren.interpret(vm, 'main', file);
+		final result = vm.interpret('main', file);
 		
-		Wren.ensureSlots(vm, 1);
-		Wren.getVariable(vm, "main", "Call", 0);
-		final callClass = Wren.getSlotHandle(vm, 0);
+		vm.ensureSlots(1);
+		vm.getVariable("main", "Call", 0);
+		final callClass = vm.getSlotHandle(0);
 	
-		final noParams = Wren.makeCallHandle(vm, "noParams");
-		final zero = Wren.makeCallHandle(vm, "zero()");
-		final one = Wren.makeCallHandle(vm, "one(_)");
-		final add = Wren.makeCallHandle(vm, "add(_,_)");
-		final point = Wren.makeCallHandle(vm, "point()");
-		final stress = Wren.makeCallHandle(vm, "stress()");
-		final module = Wren.makeCallHandle(vm, "module()");
+		final noParams = vm.makeCallHandle("noParams");
+		final zero = vm.makeCallHandle("zero()");
+		final one = vm.makeCallHandle("one(_)");
+		final add = vm.makeCallHandle("add(_,_)");
+		final point = vm.makeCallHandle("point()");
+		final stress = vm.makeCallHandle("stress()");
+		final module = vm.makeCallHandle("module()");
 	
-		Wren.ensureSlots(vm, 1);
-		Wren.setSlotHandle(vm, 0, callClass);
-		asserts.assert(Wren.call(vm, noParams) == WREN_RESULT_SUCCESS);
+		vm.ensureSlots(1);
+		vm.setSlotHandle(0, callClass);
+		asserts.assert(vm.call(noParams) == WREN_RESULT_SUCCESS);
 		
-		Wren.ensureSlots(vm, 1);
-		Wren.setSlotHandle(vm, 0, callClass);
-		asserts.assert(Wren.call(vm, zero) == WREN_RESULT_SUCCESS);
+		vm.ensureSlots(1);
+		vm.setSlotHandle(0, callClass);
+		asserts.assert(vm.call(zero) == WREN_RESULT_SUCCESS);
 		
-		Wren.ensureSlots(vm, 2);
-		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.setSlotDouble(vm, 1, 1.0);
-		asserts.assert(Wren.call(vm, one) == WREN_RESULT_SUCCESS);
+		vm.ensureSlots(2);
+		vm.setSlotHandle(0, callClass);
+		vm.setSlotDouble(1, 1.0);
+		asserts.assert(vm.call(one) == WREN_RESULT_SUCCESS);
 		
-		Wren.ensureSlots(vm, 2);
-		Wren.setSlotHandle(vm, 0, callClass);
-		Wren.setSlotDouble(vm, 1, 42);
-		Wren.setSlotDouble(vm, 2, 58);
-		asserts.assert(Wren.call(vm, add) == WREN_RESULT_SUCCESS);
-		asserts.assert(Wren.getSlotDouble(vm, 0) == 100);
+		vm.ensureSlots(2);
+		vm.setSlotHandle(0, callClass);
+		vm.setSlotDouble(1, 42);
+		vm.setSlotDouble(2, 58);
+		asserts.assert(vm.call(add) == WREN_RESULT_SUCCESS);
+		asserts.assert(vm.getSlotDouble(0) == 100);
 		
 		
-		Wren.ensureSlots(vm, 1);
-		Wren.setSlotHandle(vm, 0, callClass);
-		asserts.assert(Wren.call(vm, point) == WREN_RESULT_SUCCESS);
+		vm.ensureSlots(1);
+		vm.setSlotHandle(0, callClass);
+		asserts.assert(vm.call(point) == WREN_RESULT_SUCCESS);
 		
-		Wren.ensureSlots(vm, 1);
-		Wren.setSlotHandle(vm, 0, callClass);
-		asserts.assert(Wren.call(vm, module) == WREN_RESULT_SUCCESS);
-		asserts.assert(Wren.getSlotString(vm, 0) == 'Module: another');
+		vm.ensureSlots(1);
+		vm.setSlotHandle(0, callClass);
+		asserts.assert(vm.call(module) == WREN_RESULT_SUCCESS);
+		asserts.assert(vm.getSlotString(0) == 'Module: another');
 		
 		// for(i in 0...100) {
-		// 	Wren.ensureSlots(vm, 1);
-		// 	Wren.setSlotHandle(vm, 0, callClass);
-		// 	final result = Wren.call(vm, stress);
-		// 	Wren.collectGarbage(vm);
+		// 	vm.ensureSlots(1);
+		// 	vm.setSlotHandle(0, callClass);
+		// 	final result = vm.call(stress);
+		// 	vm.collectGarbage(
 		// }
 	
-		Wren.releaseHandle(vm, callClass);
-		Wren.releaseHandle(vm, noParams);
-		Wren.releaseHandle(vm, zero);
-		Wren.releaseHandle(vm, one);
-		Wren.releaseHandle(vm, add);
-		Wren.releaseHandle(vm, point);
-		Wren.releaseHandle(vm, stress);
-		Wren.releaseHandle(vm, module);
+		vm.releaseHandle(callClass);
+		vm.releaseHandle(noParams);
+		vm.releaseHandle(zero);
+		vm.releaseHandle(one);
+		vm.releaseHandle(add);
+		vm.releaseHandle(point);
+		vm.releaseHandle(stress);
+		vm.releaseHandle(module);
 	
 		// TODO: free the retained config object from makeVM
-		Wren.freeVM(vm);
+		vm.free();
 		
 		return asserts.done();
 	}
@@ -113,13 +111,15 @@ class Haxe {
 
 
 function add(vm:cpp.Star<wren.native.WrenVM>) {
-	final a = Wren.getSlotDouble(vm, 1);
-	final b = Wren.getSlotDouble(vm, 2);
-	Wren.setSlotDouble(vm, 0, a + b);
+	final vm:WrenVM = vm;
+	final a = vm.getSlotDouble(1);
+	final b = vm.getSlotDouble(2);
+	vm.setSlotDouble(0, a + b);
 }
 
 function instance(vm:cpp.Star<wren.native.WrenVM>) {
-	final ptr = Wren.getSlotForeign(vm, 0);
+	final vm:WrenVM = vm;
+	final ptr = vm.getSlotForeign(0);
 	final point = cpp.Native.get((cast ptr:cpp.Star<Point>));
 	if(point == null) {
 		throw 'invalid instance';
@@ -130,13 +130,14 @@ function instance(vm:cpp.Star<wren.native.WrenVM>) {
 }
 
 function allocatePoint(vm:cpp.Star<wren.native.WrenVM>) {
-	var point = new Point();
-	Wren.setSlotNewForeignDynamic(vm, 0, 0, point);
+	final vm:WrenVM = vm;
+	final point = new Point();
+	vm.setSlotNewForeignDynamic(0, 0, point);
 	
 }
 
 function finalizePoint(ptr:cpp.Star<cpp.Void>) {
-	Wren.unroot(ptr);
+	wren.native.Wren.unroot(ptr);
 }
 
 

@@ -12,4 +12,14 @@ extern enum abstract WrenInterpretResult(WrenInterpretResultStruct) from WrenInt
 	@:native('WREN_RESULT_SUCCESS') var WREN_RESULT_SUCCESS;
 	@:native('WREN_RESULT_COMPILE_ERROR') var WREN_RESULT_COMPILE_ERROR;
 	@:native('WREN_RESULT_RUNTIME_ERROR') var WREN_RESULT_RUNTIME_ERROR;
+	
+	@:from
+	static inline function fromNative(v:wren.native.WrenInterpretResult):WrenInterpretResult {
+		return cast v;
+	}
+	
+	@:to
+	inline function toNative():wren.native.WrenInterpretResult {
+		return cast this;
+	}
 }
