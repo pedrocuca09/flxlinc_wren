@@ -20,7 +20,7 @@ jobs:
           - macos-latest
           # - windows-latest
         haxe-version:
-          - 4.3.5
+          - 4.3.4
           - stable
           - nightly
         target:
