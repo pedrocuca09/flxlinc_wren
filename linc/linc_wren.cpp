@@ -85,7 +85,7 @@ namespace linc {
 				}
 			}
 			
-			return strdup(name);
+			return NULL;
 		};
 		
 		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
