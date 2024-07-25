@@ -4,6 +4,8 @@ import wren.WrenVM;
 import wren.WrenForeignClassMethods;
 import wren.WrenInterpretResult;
 
+using haxe.io.Path;
+
 @:asserts
 class Haxe {
 	public function new() {}
@@ -11,7 +13,7 @@ class Haxe {
 	public function test() {
 		final vm = create();
 		
-		final file:String = sys.io.File.getContent("tests/script.wren");
+		final file:String = sys.io.File.getContent("tests/script/main.wren");
 		final result = vm.interpret('main', file);
 		
 		vm.ensureSlots(1);
@@ -54,7 +56,7 @@ class Haxe {
 		vm.ensureSlots(1);
 		vm.setSlotHandle(0, callClass);
 		asserts.assert(vm.call(module) == WREN_RESULT_SUCCESS);
-		asserts.assert(vm.getSlotString(0) == 'Module: another');
+		asserts.assert(vm.getSlotString(0) == 'Foo#test Bar#test');
 		
 		// for(i in 0...100) {
 		// 	vm.ensureSlots(1);
@@ -82,7 +84,8 @@ class Haxe {
 		return WrenVM.make({
 			writeFn: (_, v) -> Sys.print(v),
 			errorFn: (_, type, module, line, message) -> Sys.println('Error: $type $module $line $message'),
-			loadModuleFn: (_, name) -> 'class ${capitalCase(name)} { static name { "Module: $name" } }',
+			resolveModuleFn: (_, importer, name) -> Path.join([importer, '..', name]).normalize(),
+			loadModuleFn: (_, name) -> sys.io.File.getContent('tests/script/$name.wren'),
 			bindForeignMethodFn: (vm, module, className, isStatic, signature) -> {
 				return switch [module, className, isStatic, signature] {
 					case ['main', 'Call', true, 'add(_,_)']: cpp.Callable.fromStaticFunction(add);

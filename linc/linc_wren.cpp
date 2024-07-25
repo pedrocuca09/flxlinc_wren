@@ -48,6 +48,8 @@ namespace linc {
 			auto fn = config->__Field(HX_CSTRING("writeFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
 				fn((::cpp::Pointer<WrenVM>) vm, ::String(text));
+			} else {
+				printf("%s", text);
 			}
 		}
 
@@ -60,21 +62,33 @@ namespace linc {
 			auto fn = config->__Field(HX_CSTRING("errorFn"), HX_PROP_DYNAMIC);
 			if (::hx::IsNotNull(fn)) {
 				fn((::cpp::Pointer<WrenVM>) vm, type, ::String(module), line, ::String(message));
+			} else {
+				printf("[%s:%d] %s\n", module, line, message);
 			}
 		}
 		
-		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
+		const char* resolveModuleFn(WrenVM* vm, const char* importer, const char* name) {
 			// retrieve the haxe config object stored in the VM's userData
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			auto config = *root;
 			
 			// obtain and run the callback
-			auto fn = config->__Field(HX_CSTRING("onLoadModuleComplete"), HX_PROP_DYNAMIC);
-			if (::hx::IsNotNull(fn)) {
-				fn((::cpp::Pointer<WrenVM>) vm, ::String(name));
+			auto fn = config->__Field(HX_CSTRING("resolveModuleFn"), HX_PROP_DYNAMIC);
+			if(::hx::IsNotNull(fn)) {
+				auto dyn = fn((::cpp::Pointer<WrenVM>) vm, ::String(importer), ::String(name));
+			
+				if(::hx::IsNotNull(dyn)) {
+					auto resolved = (::String) dyn;
+					// Wren will want to free the returned string, so we give it a copy
+					// ref: https://github.com/wren-lang/wren/blob/c2a75f1eaf9b1ba1245d7533a723360863fb012d/src/vm/wren_vm.c#L727
+					return strdup(resolved);
+				}
 			}
 			
-			// release the buffer
+			return strdup(name);
+		};
+		
+		void onLoadModuleComplete(WrenVM* vm, const char* name, struct ::WrenLoadModuleResult result) {
 			delete static_cast<::hx::strbuf*>(result.userData);
 		}
 
@@ -161,6 +175,7 @@ namespace linc {
 			wrenInitConfiguration(&config);
 			config.writeFn = writeFn;
 			config.errorFn = errorFn;
+			config.resolveModuleFn = resolveModuleFn;
 			config.loadModuleFn = loadModuleFn;
 			config.bindForeignMethodFn = bindForeignMethodFn;
 			config.bindForeignClassFn = bindForeignClassFn;
@@ -185,6 +200,8 @@ namespace linc {
 			config.userData = malloc(sizeof(::hx::Object*));
 			auto root = static_cast<::hx::Object**>(config.userData);
 			*root = obj.mPtr;
+			
+			// and retain it in the GC
 			::hx::GCAddRoot(root);
 			
 			return wrenNewVM(&config);
@@ -196,6 +213,7 @@ namespace linc {
 		void destroyVM(WrenVM* vm) {
 			auto root = static_cast<::hx::Object**>(wrenGetUserData(vm));
 			::hx::GCRemoveRoot(root);
+			
 			free(root);
 			
 			wrenFreeVM(vm);

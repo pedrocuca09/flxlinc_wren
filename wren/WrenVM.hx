@@ -20,11 +20,12 @@ extern abstract WrenVM(Pointer<Native>) from Pointer<Native> to Pointer<Native> 
 
 	@:native('linc::hxwren::makeVM')
 	private static function _make(config:{
-		writeFn:(vm:WrenVM, text:String)->Void,
-		errorFn:(vm:WrenVM, type:WrenErrorType, module:String, line:Int, message:String)->Void,
-		loadModuleFn:(vm:WrenVM, module:String)->String,
-		bindForeignMethodFn:(vm:WrenVM, module:String, className:String, isStatic:Bool, signature:String)->WrenForeignMethodFn,
-		bindForeignClassFn:(vm:WrenVM, module:String, className:String)->WrenForeignClassMethods,
+		?writeFn: (vm:WrenVM, text:String)->Void,
+		?errorFn: (vm:WrenVM, type:WrenErrorType, module:String, line:Int, message:String)->Void,
+		?resolveModuleFn: (vm:WrenVM, importer:String, name:String)->String,
+		?loadModuleFn: (vm:WrenVM, module:String)->String,
+		?bindForeignMethodFn: (vm:WrenVM, module:String, className:String, isStatic:Bool, signature:String)->WrenForeignMethodFn,
+		?bindForeignClassFn: (vm:WrenVM, module:String, className:String)->WrenForeignClassMethods,
 	}):Star<Native>;
 	
 	@:native('linc::hxwren::destroyVM')

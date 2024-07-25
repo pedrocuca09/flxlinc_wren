@@ -9,6 +9,8 @@ import wren.native.WrenForeignClassMethods;
 import wren.native.WrenLoadModuleResult;
 import wren.native.WrenInterpretResult;
 
+using haxe.io.Path;
+
 @:asserts
 class Native {
 	public function new() {}
@@ -16,7 +18,7 @@ class Native {
 	public function test() {
 		final vm = create();
 		
-		final file:String = sys.io.File.getContent("tests/script.wren");
+		final file:String = sys.io.File.getContent("tests/script/main.wren");
 		final result = Wren.interpret(vm, 'main', file);
 		
 		switch result {
@@ -66,7 +68,7 @@ class Native {
 		Wren.ensureSlots(vm, 1);
 		Wren.setSlotHandle(vm, 0, callClass);
 		asserts.assert(Wren.call(vm, module) == WREN_RESULT_SUCCESS);
-		asserts.assert(Wren.getSlotString(vm, 0) == 'Module: another');
+		asserts.assert(Wren.getSlotString(vm, 0) == 'Foo#test Bar#test');
 		
 		// for(i in 0...100) {
 		// 	Wren.ensureSlots(vm, 1);
@@ -94,9 +96,10 @@ class Native {
 		final conf = WrenConfiguration.init();
 		conf.writeFn = cpp.Callable.fromStaticFunction(writeFn);
 		conf.errorFn = cpp.Callable.fromStaticFunction(errorFn);
+		conf.resolveModuleFn = cpp.Callable.fromStaticFunction(resolveModuleFn);
+		conf.loadModuleFn = cpp.Callable.fromStaticFunction(loadModuleFn);
 		conf.bindForeignMethodFn = cpp.Callable.fromStaticFunction(bindForeignMethodFn);
 		conf.bindForeignClassFn = cpp.Callable.fromStaticFunction(bindForeignClassFn);
-		conf.loadModuleFn = cpp.Callable.fromStaticFunction(loadModuleFn);
 		return Wren.newVM(conf);
 	}
 }
@@ -107,7 +110,7 @@ function writeFn(vm:cpp.Star<wren.native.WrenVM>, text:cpp.ConstCharStar) {
 }
 
 function errorFn(vm:cpp.Star<wren.native.WrenVM>, type:wren.native.WrenErrorType, module:cpp.ConstCharStar, line:Int, message:cpp.ConstCharStar) {
-	Sys.println('$type, ${(module:String)}, $line, ${(message:String)}');
+	Sys.println('[${(module:String)}:$line] ${(message:String)}');
 }
 
 function bindForeignMethodFn(
@@ -142,20 +145,21 @@ function bindForeignClassFn(
 	return methods;
 }
 
+function resolveModuleFn(
+	vm:cpp.Star<wren.native.WrenVM>,
+	importer:cpp.ConstCharStar,
+	name:cpp.ConstCharStar
+):cpp.ConstCharStar {
+	final s = Path.join([importer, '..', name]).normalize();
+	return untyped __global__.strdup(s); // Wren will want to free the returned string so we give it a copy
+}
 function loadModuleFn(
 	vm:cpp.Star<wren.native.WrenVM>,
 	name:cpp.ConstCharStar
-	):wren.native.WrenLoadModuleResult {
-		final name:String = name; // cast to haxe string
-		
-		return WrenLoadModuleResult.make('class ${capitalCase(name)} { static name { "Module: $name" } }');
-		
-		// final result = WrenLoadModuleResult.init();
-		// result.source = 'class ${capitalCase(name)} { static name { "Module: $name" } }';
-		// cpp.Native.set((cast result.userData:cpp.Star<String>), name);
-		// TODO: may need to retain the source string in GC and free it in the onComplete callback
-		// return result;
-	}
+):wren.native.WrenLoadModuleResult {
+	final name:String = name; // cast to haxe string
+	return WrenLoadModuleResult.make(sys.io.File.getContent('tests/script/$name.wren'));
+}
 
 inline function capitalCase(v:String) {
 	return v.charAt(0).toUpperCase() + v.substr(1);

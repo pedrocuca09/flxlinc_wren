@@ -1,5 +1,3 @@
-
-
 class Call {
 
 	static noParams {
@@ -37,10 +35,8 @@ class Call {
 	}
 	
 	static module() {
-		import "other" for Other
-		System.print(Other.name)
-		import "another" for Another
-		return Another.name
+		import "foo/foo" for Foo
+		return Foo.test()
 	}
 	
 	foreign static add(a, b)
