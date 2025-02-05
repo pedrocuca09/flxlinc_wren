@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="MyFlixelProject" version="1.0.0" company="MyCompany" license="MIT">
+    <haxelib name="flixel" />
+    <haxelib name="flixel-addons" />
+    <haxelib name="flixel-ui" />
+    <haxelib name="tink_unittest" />
+    <haxelib name="linc_wren" />
+    <!-- Agrega otras dependencias necesarias aquí -->
+
+    <assets path="assets" rename="assets" />
+    <source path="source" />
+    <source path="tests" />
+
+    <haxedef name="FLX_NO_DEBUG" />
+    <haxedef name="FLX_NO_SOUND" />
+</project>
