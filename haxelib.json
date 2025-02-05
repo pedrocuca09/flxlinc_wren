@@ -1,14 +1,19 @@
 {
-	"name": "linc_wren",
+	"name": "flxlinc_wren",
+	"url": "https://github.com/pedrocuca09/flxlinc_wren/tree/workBranch",
 	"license": "MIT",
 	"tags": [
-		"linc",
+		"cpp",
+		"haxe",
 		"wren"
 	],
+	"description": "Haxe/hxcpp @:native bindings for Wren.",
+	"version": "0.0.1",
+	"releasenote": "initial project setup",
 	"contributors": [
-		"kevinresol"
+		"pedrocuca09"
 	],
-	"releasenote": "initial release",
-	"version": "0.0.0",
-	"dependencies": {}
+	"dependencies": {
+		"hxcpp": ""
+	}
 }
