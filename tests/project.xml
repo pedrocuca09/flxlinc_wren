@@ -4,7 +4,7 @@
     <haxelib name="flixel-addons" />
     <haxelib name="flixel-ui" />
     <haxelib name="tink_unittest" />
-    <haxelib name="flxlinc_wren" />
+    <haxelib name="flxlincWren" />
     <assets path="assets" rename="assets" />
     <source path="source" />
     <source path="tests" />
